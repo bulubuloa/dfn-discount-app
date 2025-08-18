@@ -1,7 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "cd web/frontend && SHOPIFY_API_KEY=a50bf14d23f73d67d441845d9e7db097 npm run build",
+  "buildCommand": "cd web/frontend && npm install && SHOPIFY_API_KEY=a50bf14d23f73d67d441845d9e7db097 npm run build",
   "outputDirectory": "web/frontend/dist",
-  "installCommand": "cd web/frontend && npm install",
   "framework": "vite"
 }
