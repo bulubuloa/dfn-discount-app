@@ -1,7 +1,6 @@
 import { Page, Layout, Card, Text, Stack, Badge, Button } from "@shopify/polaris";
 
 export default function Index() {
-
   return (
     <Page title="DFN Discount App - 90% Discount Function">
       <Layout>

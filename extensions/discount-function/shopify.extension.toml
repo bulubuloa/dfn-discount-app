@@ -34,7 +34,4 @@ description = "t:description"
     { key = "usageLimit", type = "number", name = "Usage Limit" }
   ]
 
-  # Remove UI paths to avoid configuration issues
-  # [extensions.ui.paths]
-  # create = "/"
-  # details = "/"
+  # No UI paths - function works without configuration
