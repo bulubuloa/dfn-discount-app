@@ -32,7 +32,7 @@ export function cartLinesDiscountsGenerateRun(
       orderDiscountsAdd: {
         candidates: [
           {
-            message: '50% OFF ENTIRE ORDER',
+            message: '90% OFF ENTIRE ORDER',
             targets: [
               {
                 orderSubtotal: {
@@ -42,7 +42,7 @@ export function cartLinesDiscountsGenerateRun(
             ],
             value: {
               percentage: {
-                value: 50,
+                value: 90,
               },
             },
           },
@@ -58,7 +58,7 @@ export function cartLinesDiscountsGenerateRun(
       productDiscountsAdd: {
         candidates: [
           {
-            message: '50% OFF ITEM',
+            message: '90% OFF ITEM',
             targets: [
               {
                 cartLine: {
@@ -68,7 +68,7 @@ export function cartLinesDiscountsGenerateRun(
             ],
             value: {
               percentage: {
-                value: 50,
+                value: 90,
               },
             },
           },

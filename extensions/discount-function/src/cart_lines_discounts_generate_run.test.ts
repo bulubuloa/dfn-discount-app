@@ -56,7 +56,7 @@ describe("cartLinesDiscountsGenerateRun", () => {
       orderDiscountsAdd: {
         candidates: [
           {
-            message: "10% OFF ORDER",
+            message: "90% OFF ORDER",
             targets: [
               {
                 orderSubtotal: {
@@ -66,7 +66,7 @@ describe("cartLinesDiscountsGenerateRun", () => {
             ],
             value: {
               percentage: {
-                value: 10,
+                value: 90,
               },
             },
           },
@@ -91,7 +91,7 @@ describe("cartLinesDiscountsGenerateRun", () => {
       productDiscountsAdd: {
         candidates: [
           {
-            message: "20% OFF PRODUCT",
+            message: "90% OFF ITEM",
             targets: [
               {
                 cartLine: {
@@ -101,7 +101,7 @@ describe("cartLinesDiscountsGenerateRun", () => {
             ],
             value: {
               percentage: {
-                value: 20,
+                value: 90,
               },
             },
           },
@@ -126,7 +126,7 @@ describe("cartLinesDiscountsGenerateRun", () => {
       orderDiscountsAdd: {
         candidates: [
           {
-            message: "10% OFF ORDER",
+            message: "90% OFF ORDER",
             targets: [
               {
                 orderSubtotal: {
@@ -136,7 +136,7 @@ describe("cartLinesDiscountsGenerateRun", () => {
             ],
             value: {
               percentage: {
-                value: 10,
+                value: 90,
               },
             },
           },
@@ -149,7 +149,7 @@ describe("cartLinesDiscountsGenerateRun", () => {
       productDiscountsAdd: {
         candidates: [
           {
-            message: "20% OFF PRODUCT",
+            message: "90% OFF ITEM",
             targets: [
               {
                 cartLine: {
@@ -159,7 +159,7 @@ describe("cartLinesDiscountsGenerateRun", () => {
             ],
             value: {
               percentage: {
-                value: 20,
+                value: 90,
               },
             },
           },

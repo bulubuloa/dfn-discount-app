@@ -22,7 +22,7 @@ export default function DiscountConfig() {
     shipping: false,
   });
   
-  const [discountPercentage, setDiscountPercentage] = useState("50");
+  const [discountPercentage, setDiscountPercentage] = useState("90");
   const [minimumOrderAmount, setMinimumOrderAmount] = useState("");
   const [usageLimit, setUsageLimit] = useState("");
 
@@ -64,7 +64,7 @@ export default function DiscountConfig() {
   return (
     <Page
       title="Configure DFN Discount Function"
-      subtitle="Set up your 50% discount function"
+      subtitle="Set up your 90% discount function"
       backAction={{
         content: "Back to Discounts",
         onAction: () => {
@@ -90,14 +90,14 @@ export default function DiscountConfig() {
               
               <FormLayout>
                 <Checkbox
-                  label="Order Discount (50% off entire order)"
+                  label="Order Discount (90% off entire order)"
                   checked={discountClasses.order}
                   onChange={(checked) => handleDiscountClassChange('order', checked)}
                   helpText="Applies discount to the entire order subtotal"
                 />
                 
                 <Checkbox
-                  label="Product Discount (50% off individual items)"
+                  label="Product Discount (90% off individual items)"
                   checked={discountClasses.product}
                   onChange={(checked) => handleDiscountClassChange('product', checked)}
                   helpText="Applies discount to each cart item individually"
@@ -130,7 +130,7 @@ export default function DiscountConfig() {
                   type="number"
                   min="1"
                   max="100"
-                  helpText="Percentage discount to apply (currently fixed at 50%)"
+                  helpText="Percentage discount to apply (currently fixed at 90%)"
                   disabled
                 />
                 
