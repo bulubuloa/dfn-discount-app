@@ -50,7 +50,7 @@ export default function Index() {
                   Create Discount
                 </Button>
                 <Button 
-                  onClick={() => window.open("/discount-config", "_blank")}
+                  onClick={() => window.open("/function-config", "_blank")}
                 >
                   Configure Function
                 </Button>
