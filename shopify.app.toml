@@ -1,9 +1,10 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+# DFN Discount App - 50% Discount Function
 
 client_id = "a50bf14d23f73d67d441845d9e7db097"
 name = "dfn-discount-app"
 handle = "dfn-discount-app"
-application_url = "https://example.com/"
+application_url = "https://btsa-staging.myshopify.com/"
 embedded = true
 
 [build]
@@ -14,10 +15,10 @@ api_version = "2025-07"
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "write_products"
+scopes = "write_products,write_discounts"
 
 [auth]
-redirect_urls = [ "https://example.com/api/auth" ]
+redirect_urls = [ "https://btsa-staging.myshopify.com/api/auth" ]
 
 [pos]
 embedded = false

@@ -1,91 +1,100 @@
-import {
-  Card,
-  Page,
-  Layout,
-  TextContainer,
-  Image,
-  Stack,
-  Link,
-  Text,
-} from "@shopify/polaris";
-import { TitleBar } from "@shopify/app-bridge-react";
-import { useTranslation, Trans } from "react-i18next";
+import { Page, Layout, Card, Text, Stack, Badge, Button } from "@shopify/polaris";
 
-import { trophyImage } from "../assets";
-
-import { ProductsCard } from "../components";
-
-export default function HomePage() {
-  const { t } = useTranslation();
+export default function Index() {
   return (
-    <Page narrowWidth>
-      <TitleBar title={t("HomePage.title")} />
+    <Page title="DFN Discount App - 50% Discount Function">
       <Layout>
         <Layout.Section>
           <Card sectioned>
-            <Stack
-              wrap={false}
-              spacing="extraTight"
-              distribution="trailing"
-              alignment="center"
-            >
-              <Stack.Item fill>
-                <TextContainer spacing="loose">
-                  <Text as="h2" variant="headingMd">
-                    {t("HomePage.heading")}
-                  </Text>
-                  <p>
-                    <Trans
-                      i18nKey="HomePage.yourAppIsReadyToExplore"
-                      components={{
-                        PolarisLink: (
-                          <Link url="https://polaris.shopify.com/" external />
-                        ),
-                        AdminApiLink: (
-                          <Link
-                            url="https://shopify.dev/api/admin-graphql"
-                            external
-                          />
-                        ),
-                        AppBridgeLink: (
-                          <Link
-                            url="https://shopify.dev/apps/tools/app-bridge"
-                            external
-                          />
-                        ),
-                      }}
-                    />
-                  </p>
-                  <p>{t("HomePage.startPopulatingYourApp")}</p>
-                  <p>
-                    <Trans
-                      i18nKey="HomePage.learnMore"
-                      components={{
-                        ShopifyTutorialLink: (
-                          <Link
-                            url="https://shopify.dev/apps/getting-started/add-functionality"
-                            external
-                          />
-                        ),
-                      }}
-                    />
-                  </p>
-                </TextContainer>
-              </Stack.Item>
-              <Stack.Item>
-                <div style={{ padding: "0 20px" }}>
-                  <Image
-                    source={trophyImage}
-                    alt={t("HomePage.trophyAltText")}
-                    width={120}
-                  />
-                </div>
-              </Stack.Item>
+            <Stack vertical spacing="loose">
+              <Text variant="headingLg" as="h2">
+                🎯 DFN Discount App - 50% Discount Function
+              </Text>
+              
+              <Text variant="bodyMd" as="p">
+                Welcome to your Shopify discount function app! This app provides powerful 50% discount capabilities for your store.
+              </Text>
+
+              <Stack distribution="center" spacing="tight">
+                <Badge tone="success">Active</Badge>
+                <Badge tone="info">Ready to Use</Badge>
+              </Stack>
             </Stack>
           </Card>
         </Layout.Section>
+
         <Layout.Section>
-          <ProductsCard />
+          <Card sectioned>
+            <Stack vertical spacing="loose">
+              <Text variant="headingMd" as="h3">
+                🚀 What This App Does
+              </Text>
+              
+              <Stack vertical spacing="tight">
+                <Text variant="bodyMd" as="p">
+                  <strong>50% Order Discount:</strong> Apply 50% off to entire orders
+                </Text>
+                <Text variant="bodyMd" as="p">
+                  <strong>50% Product Discount:</strong> Apply 50% off to individual cart items
+                </Text>
+                <Text variant="bodyMd" as="p">
+                  <strong>Smart Integration:</strong> Works seamlessly with Shopify's discount system
+                </Text>
+              </Stack>
+            </Stack>
+          </Card>
+        </Layout.Section>
+
+        <Layout.Section>
+          <Card sectioned>
+            <Stack vertical spacing="loose">
+              <Text variant="headingMd" as="h3">
+                📋 How to Use
+              </Text>
+              
+              <Stack vertical spacing="tight">
+                <Text variant="bodyMd" as="p">
+                  1. Go to your Shopify admin → Discounts
+                </Text>
+                <Text variant="bodyMd" as="p">
+                  2. Create a new discount and select "Function-based discount"
+                </Text>
+                <Text variant="bodyMd" as="p">
+                  3. Choose this app's discount function
+                </Text>
+                <Text variant="bodyMd" as="p">
+                  4. Configure discount classes and conditions
+                </Text>
+                <Text variant="bodyMd" as="p">
+                  5. Activate and start saving your customers money!
+                </Text>
+              </Stack>
+            </Stack>
+          </Card>
+        </Layout.Section>
+
+        <Layout.Section>
+          <Card sectioned>
+            <Stack vertical spacing="loose">
+              <Text variant="headingMd" as="h3">
+                🔧 App Status
+              </Text>
+              
+              <Stack distribution="center" spacing="tight">
+                <Button 
+                  primary 
+                  onClick={() => window.open("https://admin.shopify.com/store/btsa-staging/discounts", "_blank")}
+                >
+                  Go to Discounts
+                </Button>
+                <Button 
+                  onClick={() => window.open("https://github.com/yourusername/dfn-discount-app", "_blank")}
+                >
+                  View on GitHub
+                </Button>
+              </Stack>
+            </Stack>
+          </Card>
         </Layout.Section>
       </Layout>
     </Page>

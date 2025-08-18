@@ -25,21 +25,14 @@ export function cartLinesDiscountsGenerateRun(
     return {operations: []};
   }
 
-  const maxCartLine = input.cart.lines.reduce((maxLine, line) => {
-    if (line.cost.subtotalAmount.amount > maxLine.cost.subtotalAmount.amount) {
-      return line;
-    }
-    return maxLine;
-  }, input.cart.lines[0]);
-
-  const operations = [];
+  const operations: any[] = [];
 
   if (hasOrderDiscountClass) {
     operations.push({
       orderDiscountsAdd: {
         candidates: [
           {
-            message: '10% OFF ORDER',
+            message: '50% OFF ENTIRE ORDER',
             targets: [
               {
                 orderSubtotal: {
@@ -49,7 +42,7 @@ export function cartLinesDiscountsGenerateRun(
             ],
             value: {
               percentage: {
-                value: 10,
+                value: 50,
               },
             },
           },
@@ -60,28 +53,31 @@ export function cartLinesDiscountsGenerateRun(
   }
 
   if (hasProductDiscountClass) {
-    operations.push({
+    // Apply 50% discount to all cart lines
+    const productDiscountOperations = input.cart.lines.map(line => ({
       productDiscountsAdd: {
         candidates: [
           {
-            message: '20% OFF PRODUCT',
+            message: '50% OFF ITEM',
             targets: [
               {
                 cartLine: {
-                  id: maxCartLine.id,
+                  id: line.id,
                 },
               },
             ],
             value: {
               percentage: {
-                value: 20,
+                value: 50,
               },
             },
           },
         ],
         selectionStrategy: ProductDiscountSelectionStrategy.First,
       },
-    });
+    }));
+
+    operations.push(...productDiscountOperations);
   }
 
   return {
