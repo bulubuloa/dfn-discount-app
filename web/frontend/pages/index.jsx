@@ -1,6 +1,13 @@
 import { Page, Layout, Card, Text, Stack, Badge, Button } from "@shopify/polaris";
+import { useEffect } from "react";
 
 export default function Index() {
+  useEffect(() => {
+    if (window.shopify && window.shopify.config) {
+      window.location.replace("/function-config");
+    }
+  }, []);
+
   return (
     <Page title="DFN Discount App - 90% Discount Function">
       <Layout>

@@ -33,3 +33,7 @@ description = "t:description"
     { key = "minimumOrderAmount", type = "number", name = "Minimum Order Amount" },
     { key = "usageLimit", type = "number", name = "Usage Limit" }
   ]
+
+  [extensions.ui.paths]
+  create = "/function-config"
+  details = "/function-config"
