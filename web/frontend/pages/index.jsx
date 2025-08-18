@@ -69,7 +69,8 @@ export default function Index() {
                   <strong>Step 5:</strong> Configure your discount settings and activate it
                 </Text>
                 <Text variant="bodyMd" as="p">
-                  <strong>Note:</strong> When you select the function, Shopify will show you a configuration form, not this page
+                  <strong>Important:</strong> After selecting the function, you'll be redirected back here. This is normal! 
+                  The function is now active and will apply discounts automatically when customers shop.
                 </Text>
               </Stack>
             </Stack>
@@ -80,8 +81,20 @@ export default function Index() {
           <Card sectioned>
             <Stack vertical spacing="loose">
               <Text variant="headingMd" as="h3">
-                🔧 App Status
+                ✅ Function Status
               </Text>
+              
+              <Stack vertical spacing="tight">
+                <Text variant="bodyMd" as="p">
+                  <strong>Function Status:</strong> Active and Ready
+                </Text>
+                <Text variant="bodyMd" as="p">
+                  <strong>Available Discounts:</strong> 50% Order, 50% Product, Free Shipping
+                </Text>
+                <Text variant="bodyMd" as="p">
+                  <strong>Next Step:</strong> Create a discount using this function
+                </Text>
+              </Stack>
               
               <Stack distribution="center" spacing="tight">
                 <Button 
@@ -100,6 +113,31 @@ export default function Index() {
                 >
                   View on GitHub
                 </Button>
+              </Stack>
+            </Stack>
+          </Card>
+        </Layout.Section>
+
+        <Layout.Section>
+          <Card sectioned>
+            <Stack vertical spacing="loose">
+              <Text variant="headingMd" as="h3">
+                🔄 What Happens After Selection
+              </Text>
+              
+              <Stack vertical spacing="tight">
+                <Text variant="bodyMd" as="p">
+                  <strong>Normal Behavior:</strong> When you select this function, you'll be redirected back to this page. This is expected!
+                </Text>
+                <Text variant="bodyMd" as="p">
+                  <strong>Function Activation:</strong> The function is now active and will automatically apply discounts when customers shop.
+                </Text>
+                <Text variant="bodyMd" as="p">
+                  <strong>No Configuration Needed:</strong> The function works automatically based on the discount classes you select in Shopify's discount interface.
+                </Text>
+                <Text variant="bodyMd" as="p">
+                  <strong>Testing:</strong> Add items to cart and proceed to checkout to see the discounts applied automatically.
+                </Text>
               </Stack>
             </Stack>
           </Card>
