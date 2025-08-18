@@ -15,6 +15,7 @@ import {
 } from "@shopify/polaris";
 
 export default function FunctionConfig() {
+  // Function configuration page for 90% discount
   const [discountClasses, setDiscountClasses] = useState({
     order: true,
     product: false,
