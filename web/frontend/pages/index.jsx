@@ -1,6 +1,19 @@
+import { useEffect } from "react";
 import { Page, Layout, Card, Text, Stack, Badge, Button } from "@shopify/polaris";
 
 export default function Index() {
+  useEffect(() => {
+    // If we're in a Shopify Function configuration context, close it immediately
+    if (window.shopify && window.shopify.config) {
+      console.log("In Shopify config context, closing immediately");
+      try {
+        window.shopify.config.close();
+      } catch (error) {
+        console.log("Could not close config, continuing normally");
+      }
+    }
+  }, []);
+
   return (
     <Page title="DFN Discount App - 90% Discount Function">
       <Layout>
