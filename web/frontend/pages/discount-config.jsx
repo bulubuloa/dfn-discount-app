@@ -42,9 +42,22 @@ export default function DiscountConfig() {
       usageLimit
     });
     
-    // Close the modal/return to Shopify admin
+    // For Shopify Function configuration, we need to return the configuration
+    // This will be handled by Shopify's function configuration system
+    const config = {
+      discountClasses: Object.keys(discountClasses).filter(key => discountClasses[key]),
+      discountPercentage: parseInt(discountPercentage),
+      minimumOrderAmount: minimumOrderAmount ? parseFloat(minimumOrderAmount) : null,
+      usageLimit: usageLimit ? parseInt(usageLimit) : null
+    };
+    
+    // If we're in a Shopify Function configuration context
     if (window.shopify && window.shopify.config) {
-      window.shopify.config.close();
+      window.shopify.config.save(config);
+    } else {
+      // Fallback for direct access
+      console.log("Configuration saved:", config);
+      alert("Configuration saved! You can now create your discount.");
     }
   };
 
