@@ -27,8 +27,15 @@ export default function Index() {
 
   useEffect(() => {
     // Check if we're in a Shopify Function configuration context
+    console.log("Checking Shopify config context...");
+    console.log("window.shopify:", window.shopify);
+    console.log("window.shopify?.config:", window.shopify?.config);
+    
     if (window.shopify && window.shopify.config) {
+      console.log("Setting isConfiguring to true");
       setIsConfiguring(true);
+    } else {
+      console.log("Not in Shopify config context");
     }
   }, []);
 
@@ -48,12 +55,20 @@ export default function Index() {
     };
     
     console.log("Saving function configuration:", config);
+    console.log("Shopify config context:", window.shopify?.config);
     
     // If we're in a Shopify Function configuration context
     if (window.shopify && window.shopify.config) {
-      window.shopify.config.save(config);
+      try {
+        window.shopify.config.save(config);
+        console.log("Configuration saved successfully to Shopify");
+      } catch (error) {
+        console.error("Error saving configuration:", error);
+        alert("Error saving configuration. Please try again.");
+      }
     } else {
       // Fallback for direct access
+      console.log("Not in Shopify config context, showing fallback message");
       alert("Configuration saved! You can now create your discount.");
     }
   };
