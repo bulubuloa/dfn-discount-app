@@ -60,6 +60,10 @@ export default function Index() {
                   View on GitHub
                 </Button>
               </Stack>
+              
+              <Text variant="bodyMd" as="p" tone="subdued">
+                <strong>Note:</strong> If the Configure Function button doesn't work, try going to your Shopify admin → Discounts → Create discount → Function-based → Select this app
+              </Text>
             </Stack>
           </Card>
         </Layout.Section>
