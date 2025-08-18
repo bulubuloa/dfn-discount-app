@@ -1,32 +1,7 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "web/index.js",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "web/frontend/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "web/index.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "web/frontend/dist/$1"
-    }
-  ],
-  "env": {
-    "SHOPIFY_API_KEY": "@shopify_api_key",
-    "SHOPIFY_API_SECRET": "@shopify_api_secret",
-    "SCOPES": "write_products,write_discounts",
-    "HOST": "@host"
-  }
+  "buildCommand": "cd web/frontend && SHOPIFY_API_KEY=a50bf14d23f73d67d441845d9e7db097 npm run build",
+  "outputDirectory": "web/frontend/dist",
+  "installCommand": "cd web/frontend && npm install",
+  "framework": "vite"
 }
