@@ -10,6 +10,8 @@ import {
 export function cartLinesDiscountsGenerateRun(
   input: CartInput,
 ): CartLinesDiscountsGenerateRunResult {
+  console.log('Function called with input:', JSON.stringify(input, null, 2));
+  
   if (!input.cart.lines.length) {
     throw new Error('No cart lines found');
   }
@@ -21,7 +23,12 @@ export function cartLinesDiscountsGenerateRun(
     DiscountClass.Product,
   );
 
+  console.log('Discount classes:', input.discount.discountClasses);
+  console.log('Has Order class:', hasOrderDiscountClass);
+  console.log('Has Product class:', hasProductDiscountClass);
+
   if (!hasOrderDiscountClass && !hasProductDiscountClass) {
+    console.log('No discount classes found, returning empty operations');
     return {operations: []};
   }
 
@@ -80,6 +87,8 @@ export function cartLinesDiscountsGenerateRun(
     operations.push(...productDiscountOperations);
   }
 
+  console.log('Returning operations:', JSON.stringify(operations, null, 2));
+  
   return {
     operations,
   };
