@@ -47,8 +47,14 @@ export default function Index() {
   };
 
   const handleSave = () => {
+    // Convert discount classes to the format expected by Shopify
+    const selectedDiscountClasses = [];
+    if (discountClasses.order) selectedDiscountClasses.push('ORDER');
+    if (discountClasses.product) selectedDiscountClasses.push('PRODUCT');
+    if (discountClasses.shipping) selectedDiscountClasses.push('SHIPPING');
+    
     const config = {
-      discountClasses: Object.keys(discountClasses).filter(key => discountClasses[key]),
+      discountClasses: selectedDiscountClasses,
       discountPercentage: 90, // Fixed at 90%
       minimumOrderAmount: minimumOrderAmount ? parseFloat(minimumOrderAmount) : null,
       usageLimit: usageLimit ? parseInt(usageLimit) : null
@@ -60,16 +66,29 @@ export default function Index() {
     // If we're in a Shopify Function configuration context
     if (window.shopify && window.shopify.config) {
       try {
-        window.shopify.config.save(config);
-        console.log("Configuration saved successfully to Shopify");
+        // Try different approaches for saving configuration
+        if (typeof window.shopify.config.save === 'function') {
+          window.shopify.config.save(config);
+          console.log("Configuration saved successfully to Shopify");
+        } else if (typeof window.shopify.config.set === 'function') {
+          window.shopify.config.set(config);
+          console.log("Configuration set successfully to Shopify");
+        } else if (typeof window.shopify.config.update === 'function') {
+          window.shopify.config.update(config);
+          console.log("Configuration updated successfully to Shopify");
+        } else {
+          console.error("No save method found on shopify.config");
+          alert("Configuration system not available. Please try creating the discount directly in Shopify admin.");
+        }
       } catch (error) {
         console.error("Error saving configuration:", error);
-        alert("Error saving configuration. Please try again.");
+        console.error("Error details:", error.message, error.stack);
+        alert("Error saving configuration. Please try creating the discount directly in Shopify admin.");
       }
     } else {
       // Fallback for direct access
       console.log("Not in Shopify config context, showing fallback message");
-      alert("Configuration saved! You can now create your discount.");
+      alert("Configuration saved! You can now create your discount in Shopify admin.");
     }
   };
 
@@ -251,19 +270,27 @@ export default function Index() {
 
         <Layout.Section>
           <Card sectioned>
-            <Stack distribution="trailing" spacing="tight">
-              <Button
-                onClick={handleCancel}
-              >
-                Cancel
-              </Button>
-              <Button
-                primary
-                onClick={handleSave}
-                disabled={!discountClasses.order && !discountClasses.product && !discountClasses.shipping}
-              >
-                Save Configuration
-              </Button>
+            <Stack vertical spacing="loose">
+              <Text variant="headingMd" as="h3">
+                Configuration (Optional)
+              </Text>
+              <Text variant="bodyMd" as="p">
+                The function is pre-configured to apply 90% discounts. You can optionally save these settings, or proceed directly to creating a discount.
+              </Text>
+              <Stack distribution="trailing" spacing="tight">
+                <Button
+                  onClick={handleCancel}
+                >
+                  Skip Configuration
+                </Button>
+                <Button
+                  primary
+                  onClick={handleSave}
+                  disabled={!discountClasses.order && !discountClasses.product && !discountClasses.shipping}
+                >
+                  Save Configuration
+                </Button>
+              </Stack>
             </Stack>
           </Card>
         </Layout.Section>
