@@ -28,7 +28,7 @@ export default function Index() {
                   <strong>Function Status:</strong> Active and Ready
                 </Text>
                 <Text variant="bodyMd" as="p">
-                  <strong>Available Discounts:</strong> 50% Order, 50% Product, Free Shipping
+                  <strong>Available Discounts:</strong> 90% Order, 90% Product, Free Shipping
                 </Text>
                 <Text variant="bodyMd" as="p">
                   <strong>Next Step:</strong> Create a discount using this function

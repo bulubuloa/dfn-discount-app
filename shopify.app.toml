@@ -1,5 +1,5 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
-# DFN Discount App - 50% Discount Function
+# DFN Discount App - 90% Discount Function
 
 client_id = "a50bf14d23f73d67d441845d9e7db097"
 name = "dfn-discount-app"

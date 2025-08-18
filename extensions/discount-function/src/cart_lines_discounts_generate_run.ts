@@ -53,7 +53,7 @@ export function cartLinesDiscountsGenerateRun(
   }
 
   if (hasProductDiscountClass) {
-    // Apply 50% discount to all cart lines
+    // Apply 90% discount to all cart lines
     const productDiscountOperations = input.cart.lines.map(line => ({
       productDiscountsAdd: {
         candidates: [

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Page,
   Layout,
@@ -9,22 +9,28 @@ import {
   Button,
   FormLayout,
   Checkbox,
-  Select,
   TextField,
   Banner,
   Divider,
 } from "@shopify/polaris";
 
-export default function DiscountConfig() {
+export default function FunctionConfig() {
   const [discountClasses, setDiscountClasses] = useState({
     order: true,
     product: false,
     shipping: false,
   });
   
-  const [discountPercentage, setDiscountPercentage] = useState("90");
   const [minimumOrderAmount, setMinimumOrderAmount] = useState("");
   const [usageLimit, setUsageLimit] = useState("");
+  const [isConfiguring, setIsConfiguring] = useState(false);
+
+  useEffect(() => {
+    // Check if we're in a Shopify Function configuration context
+    if (window.shopify && window.shopify.config) {
+      setIsConfiguring(true);
+    }
+  }, []);
 
   const handleDiscountClassChange = (key, checked) => {
     setDiscountClasses(prev => ({
@@ -34,30 +40,27 @@ export default function DiscountConfig() {
   };
 
   const handleSave = () => {
-    // This would typically save the configuration
-    console.log("Saving discount configuration:", {
-      discountClasses,
-      discountPercentage,
-      minimumOrderAmount,
-      usageLimit
-    });
-    
-    // For Shopify Function configuration, we need to return the configuration
-    // This will be handled by Shopify's function configuration system
     const config = {
       discountClasses: Object.keys(discountClasses).filter(key => discountClasses[key]),
-      discountPercentage: parseInt(discountPercentage),
+      discountPercentage: 90, // Fixed at 90%
       minimumOrderAmount: minimumOrderAmount ? parseFloat(minimumOrderAmount) : null,
       usageLimit: usageLimit ? parseInt(usageLimit) : null
     };
+    
+    console.log("Saving function configuration:", config);
     
     // If we're in a Shopify Function configuration context
     if (window.shopify && window.shopify.config) {
       window.shopify.config.save(config);
     } else {
       // Fallback for direct access
-      console.log("Configuration saved:", config);
       alert("Configuration saved! You can now create your discount.");
+    }
+  };
+
+  const handleCancel = () => {
+    if (window.shopify && window.shopify.config) {
+      window.shopify.config.close();
     }
   };
 
@@ -65,19 +68,15 @@ export default function DiscountConfig() {
     <Page
       title="Configure DFN Discount Function"
       subtitle="Set up your 90% discount function"
-      backAction={{
-        content: "Back to Discounts",
-        onAction: () => {
-          if (window.shopify && window.shopify.config) {
-            window.shopify.config.close();
-          }
-        },
-      }}
+      backAction={isConfiguring ? {
+        content: "Cancel",
+        onAction: handleCancel,
+      } : undefined}
     >
       <Layout>
         <Layout.Section>
           <Banner title="Function Configuration" tone="info">
-            <p>Configure how your discount function will work. This function applies discounts to customer carts.</p>
+            <p>Configure how your discount function will work. This function applies 90% discounts to customer carts.</p>
           </Banner>
         </Layout.Section>
 
@@ -93,14 +92,14 @@ export default function DiscountConfig() {
                   label="Order Discount (90% off entire order)"
                   checked={discountClasses.order}
                   onChange={(checked) => handleDiscountClassChange('order', checked)}
-                  helpText="Applies discount to the entire order subtotal"
+                  helpText="Applies 90% discount to the entire order subtotal"
                 />
                 
                 <Checkbox
                   label="Product Discount (90% off individual items)"
                   checked={discountClasses.product}
                   onChange={(checked) => handleDiscountClassChange('product', checked)}
-                  helpText="Applies discount to each cart item individually"
+                  helpText="Applies 90% discount to each cart item individually"
                 />
                 
                 <Checkbox
@@ -124,13 +123,10 @@ export default function DiscountConfig() {
               <FormLayout>
                 <TextField
                   label="Discount Percentage"
-                  value={discountPercentage}
-                  onChange={setDiscountPercentage}
+                  value="90"
                   suffix="%"
                   type="number"
-                  min="1"
-                  max="100"
-                  helpText="Percentage discount to apply (currently fixed at 90%)"
+                  helpText="Percentage discount to apply (fixed at 90%)"
                   disabled
                 />
                 
@@ -195,11 +191,7 @@ export default function DiscountConfig() {
           <Card sectioned>
             <Stack distribution="trailing" spacing="tight">
               <Button
-                onClick={() => {
-                  if (window.shopify && window.shopify.config) {
-                    window.shopify.config.close();
-                  }
-                }}
+                onClick={handleCancel}
               >
                 Cancel
               </Button>
