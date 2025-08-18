@@ -4,10 +4,10 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "vite build",
+    "build": "SHOPIFY_API_KEY=a50bf14d23f73d67d441845d9e7db097 vite build",
     "dev": "vite",
     "coverage": "vitest run --coverage",
-    "vercel-build": "vite build"
+    "vercel-build": "SHOPIFY_API_KEY=a50bf14d23f73d67d441845d9e7db097 vite build"
   },
   "type": "module",
   "engines": {

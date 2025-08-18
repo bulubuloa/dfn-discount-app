@@ -1,5 +1,18 @@
 {
   "version": 2,
-  "buildCommand": "cd web/frontend && npm install && SHOPIFY_API_KEY=a50bf14d23f73d67d441845d9e7db097 npm run build",
-  "outputDirectory": "web/frontend/dist"
+  "builds": [
+    {
+      "src": "web/frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ]
 }
