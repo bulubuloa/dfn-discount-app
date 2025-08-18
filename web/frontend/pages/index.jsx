@@ -4,7 +4,7 @@ import { useEffect } from "react";
 export default function Index() {
   useEffect(() => {
     if (window.shopify && window.shopify.config) {
-      window.location.replace("/function-config");
+      window.location.replace("/functionconfig");
     }
   }, []);
 
@@ -50,7 +50,7 @@ export default function Index() {
                   Create Discount
                 </Button>
                 <Button 
-                  onClick={() => window.open("/function-config", "_blank")}
+                  onClick={() => window.open("/functionconfig", "_blank")}
                 >
                   Configure Function
                 </Button>

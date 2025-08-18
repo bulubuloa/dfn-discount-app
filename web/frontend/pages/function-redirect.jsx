@@ -6,7 +6,7 @@ export default function FunctionRedirect() {
     // Check if we're in a Shopify Function configuration context
     if (window.shopify && window.shopify.config) {
       // If we're in a function configuration context, redirect to the config page
-      window.location.href = "/function-config";
+      window.location.href = "/functionconfig";
     } else {
       // Otherwise redirect to the discounts page
       const shopDomain = window.location.hostname.includes('myshopify.com') 
