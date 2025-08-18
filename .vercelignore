@@ -1,7 +1,8 @@
-# Ignore everything except the frontend
-*
-!web/
-!web/frontend/
-!web/frontend/**
-!vercel.json
-!.vercelignore
+# Only ignore specific directories, keep everything else
+node_modules/
+.git/
+.gitignore
+README.md
+LICENSE
+extensions/
+*.log
