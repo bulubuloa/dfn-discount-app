@@ -4,7 +4,7 @@
 client_id = "a50bf14d23f73d67d441845d9e7db097"
 name = "dfn-discount-app"
 handle = "dfn-discount-app"
-application_url = "https://btsa-staging.myshopify.com/"
+application_url = "https://dfn-discount-app-frontend.vercel.app"
 embedded = true
 
 [build]
@@ -18,7 +18,7 @@ api_version = "2025-07"
 scopes = "write_products,write_discounts"
 
 [auth]
-redirect_urls = [ "https://btsa-staging.myshopify.com/api/auth" ]
+redirect_urls = [ "https://dfn-discount-app-frontend.vercel.app/api/auth" ]
 
 [pos]
 embedded = false

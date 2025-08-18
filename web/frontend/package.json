@@ -6,7 +6,8 @@
   "scripts": {
     "build": "vite build",
     "dev": "vite",
-    "coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage",
+    "vercel-build": "vite build"
   },
   "type": "module",
   "engines": {

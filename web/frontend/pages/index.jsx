@@ -88,6 +88,11 @@ export default function Index() {
                   Go to Discounts
                 </Button>
                 <Button 
+                  onClick={() => window.open("/discount-config", "_blank")}
+                >
+                  Configure Function
+                </Button>
+                <Button 
                   onClick={() => window.open("https://github.com/yourusername/dfn-discount-app", "_blank")}
                 >
                   View on GitHub
