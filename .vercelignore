@@ -1,8 +1,0 @@
-# Only ignore specific directories, keep everything else
-node_modules/
-.git/
-.gitignore
-README.md
-LICENSE
-extensions/
-*.log
