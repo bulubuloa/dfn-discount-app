@@ -35,5 +35,5 @@ description = "t:description"
   ]
 
   [extensions.ui.paths]
-  create = "/function-config"
-  details = "/function-config"
+  create = "/"
+  details = "/"
