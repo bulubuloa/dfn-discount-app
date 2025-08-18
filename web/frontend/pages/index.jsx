@@ -49,24 +49,27 @@ export default function Index() {
           <Card sectioned>
             <Stack vertical spacing="loose">
               <Text variant="headingMd" as="h3">
-                📋 How to Use
+                📋 How to Use This Discount Function
               </Text>
               
               <Stack vertical spacing="tight">
                 <Text variant="bodyMd" as="p">
-                  1. Go to your Shopify admin → Discounts
+                  <strong>Step 1:</strong> Click "Create Discount" button below
                 </Text>
                 <Text variant="bodyMd" as="p">
-                  2. Create a new discount and select "Function-based discount"
+                  <strong>Step 2:</strong> In the discounts page, click "Create discount"
                 </Text>
                 <Text variant="bodyMd" as="p">
-                  3. Choose this app's discount function
+                  <strong>Step 3:</strong> Select "Function-based discount" as the type
                 </Text>
                 <Text variant="bodyMd" as="p">
-                  4. Configure discount classes and conditions
+                  <strong>Step 4:</strong> Choose "dfn-discount-app" from the function list
                 </Text>
                 <Text variant="bodyMd" as="p">
-                  5. Activate and start saving your customers money!
+                  <strong>Step 5:</strong> Configure your discount settings and activate it
+                </Text>
+                <Text variant="bodyMd" as="p">
+                  <strong>Note:</strong> When you select the function, Shopify will show you a configuration form, not this page
                 </Text>
               </Stack>
             </Stack>
@@ -85,7 +88,7 @@ export default function Index() {
                   primary 
                   onClick={() => window.open("https://admin.shopify.com/store/btsa-staging/discounts", "_blank")}
                 >
-                  Go to Discounts
+                  Create Discount
                 </Button>
                 <Button 
                   onClick={() => window.open("/discount-config", "_blank")}
