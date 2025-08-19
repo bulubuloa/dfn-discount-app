@@ -1,4 +1,4 @@
 {
-  "name": "discount-function",
-  "description": "discount-function"
+  "name": "DFN Discount App",
+  "description": "Automatically applies configurable discounts to cart lines, order subtotals, and shipping rates"
 }

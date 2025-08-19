@@ -2,6 +2,14 @@ query DeliveryInput {
   cart {
     deliveryGroups {
       id
+      deliveryOptions {
+        handle
+        title
+        cost {
+          amount
+          currencyCode
+        }
+      }
     }
   }
   discount {

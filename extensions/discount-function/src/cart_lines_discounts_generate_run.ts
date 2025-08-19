@@ -6,7 +6,6 @@ import {
   CartLinesDiscountsGenerateRunResult,
 } from '../generated/api';
 
-
 export function cartLinesDiscountsGenerateRun(
   input: CartInput,
 ): CartLinesDiscountsGenerateRunResult {
@@ -48,16 +47,18 @@ export function cartLinesDiscountsGenerateRun(
 
   const operations: any[] = [];
 
+  // Apply order discount if eligible
   if (hasOrderDiscountClass) {
     console.log(`🎉 Applying ${ORDER_DISCOUNT_PERCENT}% order discount`);
     
-    // Check minimum order amount if configured
+    // Calculate cart subtotal
     const cartSubtotal = input.cart.lines.reduce((total, line) => {
       return total + (line.cost?.subtotalAmount?.amount || 0);
     }, 0);
     
     console.log('Cart subtotal:', cartSubtotal);
     
+    // Check minimum order amount
     if (MINIMUM_ORDER_AMOUNT > 0 && cartSubtotal < MINIMUM_ORDER_AMOUNT) {
       console.log(`❌ Cart subtotal $${cartSubtotal} is below minimum $${MINIMUM_ORDER_AMOUNT}`);
     } else {
@@ -87,32 +88,35 @@ export function cartLinesDiscountsGenerateRun(
     }
   }
 
+  // Apply product discounts if eligible
   if (hasProductDiscountClass) {
     console.log(`🎉 Applying ${PRODUCT_DISCOUNT_PERCENT}% product discount to ${input.cart.lines.length} items`);
     
-    // Apply discount to all cart lines
-    const productDiscountOperations = input.cart.lines.map(line => ({
-      productDiscountsAdd: {
-        candidates: [
-          {
-            message: `${PRODUCT_DISCOUNT_PERCENT}% OFF ITEM`,
-            targets: [
-              {
-                cartLine: {
-                  id: line.id,
+    // Apply discount to each cart line
+    const productDiscountOperations = input.cart.lines.map(line => {
+      return {
+        productDiscountsAdd: {
+          candidates: [
+            {
+              message: `${PRODUCT_DISCOUNT_PERCENT}% OFF ITEM`,
+              targets: [
+                {
+                  cartLine: {
+                    id: line.id,
+                  },
+                },
+              ],
+              value: {
+                percentage: {
+                  value: PRODUCT_DISCOUNT_PERCENT,
                 },
               },
-            ],
-            value: {
-              percentage: {
-                value: PRODUCT_DISCOUNT_PERCENT,
-              },
             },
-          },
-        ],
-        selectionStrategy: ProductDiscountSelectionStrategy.First,
-      },
-    }));
+          ],
+          selectionStrategy: ProductDiscountSelectionStrategy.First,
+        },
+      };
+    });
 
     operations.push(...productDiscountOperations);
     console.log('✅ Product discount operations added for all cart lines');
