@@ -34,4 +34,6 @@ description = "t:description"
     { key = "usageLimit", type = "number", name = "Usage Limit" }
   ]
 
-  # No UI paths - function works without configuration
+  [[extensions.ui_paths]]
+  target = "admin"
+  path = "config"

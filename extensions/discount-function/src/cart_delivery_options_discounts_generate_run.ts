@@ -30,9 +30,12 @@ export function cartDeliveryOptionsDiscountsGenerateRun(
     return {operations: []};
   }
 
-  // Configurable shipping discount percentage
+  // Default shipping discount percentage
   const SHIPPING_DISCOUNT_PERCENT = 50;
   
+  console.log('⚙️ Using shipping configuration:', {
+    shippingDiscountPercent: SHIPPING_DISCOUNT_PERCENT
+  });
   console.log(`🎉 Applying ${SHIPPING_DISCOUNT_PERCENT}% shipping discount`);
 
   const result = {

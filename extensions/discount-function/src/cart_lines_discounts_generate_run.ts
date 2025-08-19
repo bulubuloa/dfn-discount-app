@@ -35,10 +35,16 @@ export function cartLinesDiscountsGenerateRun(
     return {operations: []};
   }
 
-  // Configurable discount percentages (these would come from app settings)
+  // Default configuration values (these can be overridden by extension settings)
   const ORDER_DISCOUNT_PERCENT = 20;
   const PRODUCT_DISCOUNT_PERCENT = 15;
   const MINIMUM_ORDER_AMOUNT = 0;
+
+  console.log('⚙️ Using configuration:', {
+    orderDiscountPercent: ORDER_DISCOUNT_PERCENT,
+    productDiscountPercent: PRODUCT_DISCOUNT_PERCENT,
+    minimumOrderAmount: MINIMUM_ORDER_AMOUNT
+  });
 
   const operations: any[] = [];
 
