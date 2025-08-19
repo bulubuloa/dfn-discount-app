@@ -35,9 +35,16 @@ app.post(
 // If you are adding routes outside of the /api path, remember to
 // also add a proxy rule for them in web/frontend/vite.config.js
 
-app.use("/api/*", shopify.validateAuthenticatedSession());
-
 app.use(express.json());
+
+// Test endpoint for debugging (no authentication required)
+app.get("/api/test", (req, res) => {
+  console.log("Test endpoint hit");
+  res.json({ message: "API is working!", timestamp: new Date().toISOString() });
+});
+
+// Apply authentication middleware to API routes (except test)
+app.use("/api/*", shopify.validateAuthenticatedSession());
 
 app.get("/api/products/count", async (_req, res) => {
   const client = new shopify.api.clients.Graphql({
@@ -67,12 +74,6 @@ app.post("/api/products", async (_req, res) => {
     error = e.message;
   }
   res.status(status).send({ success: status === 200, error });
-});
-
-// Test endpoint for debugging
-app.get("/api/test", (req, res) => {
-  console.log("Test endpoint hit");
-  res.json({ message: "API is working!", timestamp: new Date().toISOString() });
 });
 
 // Discount API routes
