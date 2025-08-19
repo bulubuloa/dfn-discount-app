@@ -69,6 +69,13 @@ app.post("/api/products", async (_req, res) => {
   res.status(status).send({ success: status === 200, error });
 });
 
+// Import and use the discount API routes
+import getFunctionId from "./api/get-function-id.js";
+import createDiscount from "./api/create-discount.js";
+
+app.get("/api/get-function-id", getFunctionId);
+app.post("/api/create-discount", createDiscount);
+
 app.use(shopify.cspHeaders());
 app.use(serveStatic(STATIC_PATH, { index: false }));
 
