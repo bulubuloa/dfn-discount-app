@@ -43,10 +43,8 @@ app.get("/api/test", (req, res) => {
   res.json({ message: "API is working!", timestamp: new Date().toISOString() });
 });
 
-// Apply authentication middleware to API routes (except test)
-app.use("/api/*", shopify.validateAuthenticatedSession());
-
-app.get("/api/products/count", async (_req, res) => {
+// Apply authentication middleware to specific API routes that need it
+app.get("/api/products/count", shopify.validateAuthenticatedSession(), async (_req, res) => {
   const client = new shopify.api.clients.Graphql({
     session: res.locals.shopify.session,
   });
@@ -62,7 +60,7 @@ app.get("/api/products/count", async (_req, res) => {
   res.status(200).send({ count: countData.data.productsCount.count });
 });
 
-app.post("/api/products", async (_req, res) => {
+app.post("/api/products", shopify.validateAuthenticatedSession(), async (_req, res) => {
   let status = 200;
   let error = null;
 
@@ -76,8 +74,8 @@ app.post("/api/products", async (_req, res) => {
   res.status(status).send({ success: status === 200, error });
 });
 
-// Discount API routes
-app.get("/api/get-function-id", async (req, res) => {
+// Discount API routes with authentication
+app.get("/api/get-function-id", shopify.validateAuthenticatedSession(), async (req, res) => {
   console.log("Get function ID endpoint hit");
   try {
     const client = new shopify.api.clients.Graphql({
@@ -129,7 +127,7 @@ app.get("/api/get-function-id", async (req, res) => {
   }
 });
 
-app.post("/api/create-discount", async (req, res) => {
+app.post("/api/create-discount", shopify.validateAuthenticatedSession(), async (req, res) => {
   try {
     const { functionId, title, message, config } = req.body;
 
