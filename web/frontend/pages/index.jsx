@@ -53,8 +53,8 @@ export default function Index() {
       
       console.log('Creating discount using Shopify App Bridge...');
       
-      // Check if we're in a Shopify app context
-      if (window.shopify && window.shopify.config) {
+      // Check if we're in a Shopify app context and have access to the API
+      if (window.shopify && window.shopify.config && window.shopify.config.api) {
         // We're in a Shopify app context, use App Bridge
         const client = window.shopify.config.api;
         
@@ -138,7 +138,7 @@ export default function Index() {
         
       } else {
         // Fallback to manual instructions
-        throw new Error('Not in Shopify app context. Please use the manual GraphiQL method.');
+        throw new Error('Shopify App Bridge API not available. Please use the manual GraphiQL method.');
       }
       
     } catch (error) {
