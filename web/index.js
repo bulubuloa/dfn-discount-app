@@ -280,14 +280,6 @@ app.post("/api/create-discount-simple", shopify.validateAuthenticatedSession(), 
             functionId: "${discountFunction.id}"
             discountClasses: [PRODUCT, ORDER, SHIPPING]
             startsAt: "${new Date().toISOString()}"
-            metafields: [
-              {
-                namespace: "dfn"
-                key: "config"
-                type: "json"
-                value: "${JSON.stringify(config || {}).replace(/"/g, '\\"')}"
-              }
-            ]
           }
         ) {
           automaticAppDiscount {
