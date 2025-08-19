@@ -5,7 +5,7 @@ export default function handler(req: VercelRequest, res: VercelResponse): void {
   if (req.method === 'OPTIONS') {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, x-shopify-shop-domain');
     res.setHeader('Access-Control-Max-Age', '86400');
     res.status(200).end();
     return;
@@ -19,7 +19,7 @@ export default function handler(req: VercelRequest, res: VercelResponse): void {
   // Set CORS headers for actual response
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, x-shopify-shop-domain');
 
   res.status(200).json({
     success: true,

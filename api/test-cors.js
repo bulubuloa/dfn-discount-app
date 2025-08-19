@@ -7,7 +7,7 @@ const createMockReq = (method = 'OPTIONS') => ({
   headers: {
     'origin': 'https://dfn-discount-app-frontend.vercel.app',
     'access-control-request-method': 'POST',
-    'access-control-request-headers': 'Content-Type, Authorization'
+    'access-control-request-headers': 'Content-Type, Authorization, x-shopify-shop-domain'
   },
   url: '/api/discount-workflow'
 });
