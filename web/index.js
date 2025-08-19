@@ -212,30 +212,14 @@ app.post("/api/create-discount", shopify.validateAuthenticatedSession(), async (
   }
 });
 
-// Simple endpoint that automatically creates discount (no authentication required)
-app.post("/api/create-discount-simple", async (req, res) => {
+// Simple endpoint that automatically creates discount (requires Shopify session)
+app.post("/api/create-discount-simple", shopify.validateAuthenticatedSession(), async (req, res) => {
   try {
     const { title, message, config } = req.body;
 
-    // Get the shop domain from the request headers or session
-    const shop = req.headers['x-shopify-shop-domain'] || process.env.SHOPIFY_SHOP_DOMAIN;
-    
-    if (!shop) {
-      return res.status(400).json({ 
-        success: false,
-        error: 'Shop domain not found. Please ensure you are accessing this from within Shopify.' 
-      });
-    }
-
-    // Get access token from session or environment
-    const accessToken = req.headers['x-shopify-access-token'] || process.env.SHOPIFY_ACCESS_TOKEN;
-    
-    if (!accessToken) {
-      return res.status(400).json({ 
-        success: false,
-        error: 'Access token not found. Please ensure you are authenticated with Shopify.' 
-      });
-    }
+    // Get shop and session from Shopify context
+    const shop = res.locals.shopify.session.shop;
+    const accessToken = res.locals.shopify.session.accessToken;
 
     console.log('Creating discount automatically for shop:', shop);
 
