@@ -1,20 +1,57 @@
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+import { Request, Response } from 'express';
 
+interface WorkflowRequest {
+  title?: string;
+  startsAt?: string;
+  discountClasses?: string;
+}
+
+interface ShopifyFunction {
+  app: {
+    title: string;
+  };
+  apiType: string;
+  title: string;
+  id: string;
+}
+
+interface FunctionResponse {
+  data?: {
+    shopifyFunctions?: {
+      nodes: ShopifyFunction[];
+    };
+  };
+  errors?: any[];
+}
+
+interface DiscountResponse {
+  data?: {
+    discountAutomaticAppCreate?: {
+      automaticAppDiscount?: {
+        discountId: string;
+      };
+      userErrors?: Array<{
+        field: string;
+        message: string;
+      }>;
+    };
+  };
+  errors?: any[];
+}
+
+export const discountWorkflowHandler = async (req: Request, res: Response) => {
   try {
-    const { title, startsAt, discountClasses } = req.body;
+    const { title, startsAt, discountClasses }: WorkflowRequest = req.body;
 
     // Get the shop domain from the request headers or session
-    const shop = req.headers['x-shopify-shop-domain'] || process.env.SHOPIFY_SHOP_DOMAIN;
+    const shop = req.headers['x-shopify-shop-domain'] as string || process.env.SHOPIFY_SHOP_DOMAIN;
     
     if (!shop) {
       return res.status(400).json({ error: 'Shop domain not found' });
     }
 
     // Get access token from session or environment
-    const accessToken = req.headers['x-shopify-access-token'] || process.env.SHOPIFY_ACCESS_TOKEN;
+    const accessToken = req.headers['x-shopify-access-token'] as string || process.env.SHOPIFY_ACCESS_TOKEN;
     
     if (!accessToken) {
       return res.status(400).json({ error: 'Access token not found' });
@@ -51,7 +88,7 @@ export default async function handler(req, res) {
       throw new Error(`Function query failed: ${functionResponse.status}`);
     }
 
-    const functionData = await functionResponse.json();
+    const functionData: FunctionResponse = await functionResponse.json();
     
     if (functionData.errors) {
       throw new Error(`GraphQL errors: ${JSON.stringify(functionData.errors)}`);
@@ -107,7 +144,7 @@ export default async function handler(req, res) {
       throw new Error(`Discount creation failed: ${discountResponse.status}`);
     }
 
-    const discountData = await discountResponse.json();
+    const discountData: DiscountResponse = await discountResponse.json();
     
     if (discountData.errors) {
       throw new Error(`GraphQL errors: ${JSON.stringify(discountData.errors)}`);
@@ -115,11 +152,11 @@ export default async function handler(req, res) {
 
     const result = discountData.data?.discountAutomaticAppCreate;
     
-    if (result.userErrors && result.userErrors.length > 0) {
+    if (result?.userErrors && result.userErrors.length > 0) {
       throw new Error(`Discount creation failed: ${result.userErrors.map(e => e.message).join(', ')}`);
     }
 
-    if (!result.automaticAppDiscount) {
+    if (!result?.automaticAppDiscount) {
       throw new Error('Discount creation failed: No discount returned');
     }
 
@@ -157,7 +194,7 @@ export default async function handler(req, res) {
     
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: error instanceof Error ? error.message : 'Unknown error',
       instructions: {
         message: 'Workflow failed. Please use GraphiQL manually:',
         steps: [
@@ -201,4 +238,4 @@ export default async function handler(req, res) {
       }
     });
   }
-}
+};
