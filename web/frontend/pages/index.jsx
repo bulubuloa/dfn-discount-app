@@ -295,7 +295,7 @@ export default function Index() {
             </Stack>
           </Card>
         </Layout.Section>
-
+      </Layout>
       {/* Create Discount Modal */}
       <Modal
         open={showCreateDiscountModal}
