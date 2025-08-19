@@ -54,7 +54,7 @@ export default function Index() {
       console.log('Creating discount using Shopify Admin API...');
       
       // Try to use the Shopify Admin API directly
-      const response = await fetch('/api/create-discount-simple', {
+      const response = await fetch('./api/create-discount-simple', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
