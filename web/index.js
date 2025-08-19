@@ -344,7 +344,7 @@ app.post("/api/create-discount-simple", shopify.validateAuthenticatedSession(), 
   } catch (error) {
     console.error('Error creating discount automatically:', error);
     
-        // Return error response instead of fake success
+    // Return error response instead of fake success
     res.status(500).json({
       success: false,
       error: error.message,
