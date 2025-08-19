@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Page, Layout, Card, Text, Stack, Button, Banner, Icon, Box, Spinner, CodeBlock } from "@shopify/polaris";
-import { DiscountsMajor, PlayMajor, CheckmarkMajor, CancelMajor } from "@shopify/polaris-icons";
+import { Page, Layout, Card, Text, Stack, Button, Banner, Icon, Box, Spinner, CodeBlock, List } from "@shopify/polaris";
+import { DiscountsMajor, PlayMajor, CircleTickMajor, CircleCancelMajor } from "@shopify/polaris-icons";
 
 export default function ApiTest() {
   const [isTesting, setIsTesting] = useState(false);
@@ -199,7 +199,7 @@ export default function ApiTest() {
                 <Banner
                   title={testResults.type === 'success' ? 'Success!' : 'Error'}
                   tone={testResults.type}
-                  icon={testResults.type === 'success' ? CheckmarkMajor : CancelMajor}
+                  icon={testResults.type === 'success' ? CircleTickMajor : CircleCancelMajor}
                 >
                   <p>{testResults.message}</p>
                 </Banner>
