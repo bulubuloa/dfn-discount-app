@@ -10,7 +10,8 @@ export function cartDeliveryOptionsDiscountsGenerateRun(
 ): CartDeliveryOptionsDiscountsGenerateRunResult {
   const firstDeliveryGroup = input.cart.deliveryGroups[0];
   if (!firstDeliveryGroup) {
-    throw new Error("No delivery groups found");
+    console.log("No delivery groups found, returning empty operations");
+    return {operations: []};
   }
 
   const hasShippingDiscountClass = input.discount.discountClasses.includes(
@@ -18,6 +19,7 @@ export function cartDeliveryOptionsDiscountsGenerateRun(
   );
 
   if (!hasShippingDiscountClass) {
+    console.log("No shipping discount class found, returning empty operations");
     return {operations: []};
   }
 
@@ -27,7 +29,7 @@ export function cartDeliveryOptionsDiscountsGenerateRun(
         deliveryDiscountsAdd: {
           candidates: [
             {
-              message: "FREE DELIVERY",
+              message: "50% OFF SHIPPING",
               targets: [
                 {
                   deliveryGroup: {
@@ -37,7 +39,7 @@ export function cartDeliveryOptionsDiscountsGenerateRun(
               ],
               value: {
                 percentage: {
-                  value: 100,
+                  value: 50,
                 },
               },
             },

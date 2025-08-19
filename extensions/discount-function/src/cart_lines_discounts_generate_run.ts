@@ -13,7 +13,8 @@ export function cartLinesDiscountsGenerateRun(
   console.log('Function called with input:', JSON.stringify(input, null, 2));
   
   if (!input.cart.lines.length) {
-    throw new Error('No cart lines found');
+    console.log('No cart lines found, returning empty operations');
+    return {operations: []};
   }
 
   const hasOrderDiscountClass = input.discount.discountClasses.includes(
@@ -39,7 +40,7 @@ export function cartLinesDiscountsGenerateRun(
       orderDiscountsAdd: {
         candidates: [
           {
-            message: '90% OFF ENTIRE ORDER',
+            message: '20% OFF ENTIRE ORDER',
             targets: [
               {
                 orderSubtotal: {
@@ -49,7 +50,7 @@ export function cartLinesDiscountsGenerateRun(
             ],
             value: {
               percentage: {
-                value: 90,
+                value: 20,
               },
             },
           },
@@ -60,12 +61,12 @@ export function cartLinesDiscountsGenerateRun(
   }
 
   if (hasProductDiscountClass) {
-    // Apply 90% discount to all cart lines
+    // Apply 15% discount to all cart lines
     const productDiscountOperations = input.cart.lines.map(line => ({
       productDiscountsAdd: {
         candidates: [
           {
-            message: '90% OFF ITEM',
+            message: '15% OFF ITEM',
             targets: [
               {
                 cartLine: {
@@ -75,7 +76,7 @@ export function cartLinesDiscountsGenerateRun(
             ],
             value: {
               percentage: {
-                value: 90,
+                value: 15,
               },
             },
           },

@@ -56,7 +56,7 @@ describe("cartLinesDiscountsGenerateRun", () => {
       orderDiscountsAdd: {
         candidates: [
           {
-            message: "90% OFF ORDER",
+            message: "20% OFF ENTIRE ORDER",
             targets: [
               {
                 orderSubtotal: {
@@ -66,7 +66,7 @@ describe("cartLinesDiscountsGenerateRun", () => {
             ],
             value: {
               percentage: {
-                value: 90,
+                value: 20,
               },
             },
           },
@@ -91,7 +91,7 @@ describe("cartLinesDiscountsGenerateRun", () => {
       productDiscountsAdd: {
         candidates: [
           {
-            message: "90% OFF ITEM",
+            message: "15% OFF ITEM",
             targets: [
               {
                 cartLine: {
@@ -101,7 +101,7 @@ describe("cartLinesDiscountsGenerateRun", () => {
             ],
             value: {
               percentage: {
-                value: 90,
+                value: 15,
               },
             },
           },
@@ -126,7 +126,7 @@ describe("cartLinesDiscountsGenerateRun", () => {
       orderDiscountsAdd: {
         candidates: [
           {
-            message: "90% OFF ORDER",
+            message: "20% OFF ENTIRE ORDER",
             targets: [
               {
                 orderSubtotal: {
@@ -136,7 +136,7 @@ describe("cartLinesDiscountsGenerateRun", () => {
             ],
             value: {
               percentage: {
-                value: 90,
+                value: 20,
               },
             },
           },
@@ -149,7 +149,7 @@ describe("cartLinesDiscountsGenerateRun", () => {
       productDiscountsAdd: {
         candidates: [
           {
-            message: "90% OFF ITEM",
+            message: "15% OFF ITEM",
             targets: [
               {
                 cartLine: {
@@ -159,7 +159,7 @@ describe("cartLinesDiscountsGenerateRun", () => {
             ],
             value: {
               percentage: {
-                value: 90,
+                value: 15,
               },
             },
           },
