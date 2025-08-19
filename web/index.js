@@ -69,12 +69,138 @@ app.post("/api/products", async (_req, res) => {
   res.status(status).send({ success: status === 200, error });
 });
 
-// Import and use the discount API routes
-import getFunctionId from "./api/get-function-id.js";
-import createDiscount from "./api/create-discount.js";
+// Discount API routes
+app.get("/api/get-function-id", async (req, res) => {
+  try {
+    const client = new shopify.api.clients.Graphql({
+      session: res.locals.shopify.session,
+    });
 
-app.get("/api/get-function-id", getFunctionId);
-app.post("/api/create-discount", createDiscount);
+    const GET_FUNCTIONS = `
+      query getFunctions {
+        shopifyFunctions(first: 10) {
+          nodes {
+            id
+            title
+            apiType
+            app {
+              title
+            }
+          }
+        }
+      }
+    `;
+
+    const data = await client.request(GET_FUNCTIONS);
+    
+    // Find our function
+    const ourFunction = data.shopifyFunctions.nodes.find(
+      func => func.title === 'DFN Discount App' || func.title === 'discount-function'
+    );
+
+    if (!ourFunction) {
+      return res.status(404).json({ error: 'Function not found. Make sure the function is deployed.' });
+    }
+
+    return res.status(200).json({ 
+      functionId: ourFunction.id,
+      functionTitle: ourFunction.title,
+      apiType: ourFunction.apiType
+    });
+
+  } catch (error) {
+    console.error('Error getting function ID:', error);
+    return res.status(500).json({ 
+      error: 'Failed to get function ID',
+      details: error.message 
+    });
+  }
+});
+
+app.post("/api/create-discount", async (req, res) => {
+  try {
+    const { functionId, title, message, config } = req.body;
+
+    if (!functionId || !title) {
+      return res.status(400).json({ error: 'Missing required fields: functionId, title' });
+    }
+
+    const client = new shopify.api.clients.Graphql({
+      session: res.locals.shopify.session,
+    });
+
+    const CREATE_DISCOUNT = `
+      mutation createAutomaticDiscount($input: AutomaticDiscountInput!) {
+        automaticDiscountCreate(input: $input) {
+          automaticDiscount {
+            id
+            title
+            status
+          }
+          userErrors {
+            field
+            message
+          }
+        }
+      }
+    `;
+
+    // Prepare the discount input
+    const discountInput = {
+      title: title,
+      message: message || "🎉 Special discount applied automatically!",
+      functionId: functionId,
+      startsAt: new Date().toISOString(),
+      endsAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // 1 year from now
+      customerGets: {
+        value: {
+          percentage: 0 // The function will handle the actual discount logic
+        },
+        items: {
+          all: true
+        }
+      },
+      customerSelection: {
+        all: true
+      },
+      minimumRequirement: {
+        subtotal: {
+          greaterThanOrEqualToAmount: config?.minimumOrderAmount || 0
+        }
+      }
+    };
+
+    // Create the discount
+    const data = await client.request(CREATE_DISCOUNT, {
+      input: discountInput
+    });
+
+    if (data.automaticDiscountCreate.userErrors.length > 0) {
+      const errors = data.automaticDiscountCreate.userErrors.map(err => `${err.field}: ${err.message}`).join(', ');
+      return res.status(400).json({ 
+        error: 'Failed to create discount',
+        details: errors 
+      });
+    }
+
+    const discount = data.automaticDiscountCreate.automaticDiscount;
+
+    return res.status(200).json({ 
+      success: true,
+      discountId: discount.id,
+      discountTitle: discount.title,
+      status: discount.status,
+      message: 'Discount created successfully!'
+    });
+
+  } catch (error) {
+    console.error('Error creating discount:', error);
+    return res.status(500).json({ 
+      error: 'Failed to create discount',
+      details: error.message 
+    });
+  }
+});
 
 app.use(shopify.cspHeaders());
 app.use(serveStatic(STATIC_PATH, { index: false }));
