@@ -18,26 +18,28 @@ interface GraphQLResponse {
   errors?: any[];
 }
 
-export const testGraphQLHandler = async (req: Request, res: Response) => {
+export const testGraphQLHandler = async (req: Request, res: Response): Promise<void> => {
   try {
     // Get the shop domain from the request headers or session
     const shop = req.headers['x-shopify-shop-domain'] as string || process.env.SHOPIFY_SHOP_DOMAIN;
     
     if (!shop) {
-      return res.status(400).json({ 
+      res.status(400).json({ 
         error: 'Shop domain not found',
         instructions: 'Set SHOPIFY_SHOP_DOMAIN environment variable or pass x-shopify-shop-domain header'
       });
+      return;
     }
 
     // Get access token from session or environment
     const accessToken = req.headers['x-shopify-access-token'] as string || process.env.SHOPIFY_ACCESS_TOKEN;
     
     if (!accessToken) {
-      return res.status(400).json({ 
+      res.status(400).json({ 
         error: 'Access token not found',
         instructions: 'Set SHOPIFY_ACCESS_TOKEN environment variable or pass x-shopify-access-token header'
       });
+      return;
     }
 
     // Test the exact query from the user

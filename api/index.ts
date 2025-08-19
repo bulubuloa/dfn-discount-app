@@ -1,9 +1,9 @@
 import express from 'express';
 import cors from 'cors';
-import { shopifyFunctionsHandler } from './routes/shopify-functions';
-import { createDiscountHandler } from './routes/create-discount';
-import { discountWorkflowHandler } from './routes/discount-workflow';
-import { testGraphQLHandler } from './routes/test-graphql';
+import { shopifyFunctionsHandler } from './routes/shopify-functions.js';
+import { createDiscountHandler } from './routes/create-discount.js';
+import { discountWorkflowHandler } from './routes/discount-workflow.js';
+import { testGraphQLHandler } from './routes/test-graphql.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;

@@ -22,27 +22,30 @@ interface DiscountResponse {
   errors?: any[];
 }
 
-export const createDiscountHandler = async (req: Request, res: Response) => {
+export const createDiscountHandler = async (req: Request, res: Response): Promise<void> => {
   try {
     const { functionId, title, startsAt, discountClasses }: CreateDiscountRequest = req.body;
 
     // Validate required parameters
     if (!functionId) {
-      return res.status(400).json({ error: 'functionId is required' });
+      res.status(400).json({ error: 'functionId is required' });
+      return;
     }
 
     // Get the shop domain from the request headers or session
     const shop = req.headers['x-shopify-shop-domain'] as string || process.env.SHOPIFY_SHOP_DOMAIN;
     
     if (!shop) {
-      return res.status(400).json({ error: 'Shop domain not found' });
+      res.status(400).json({ error: 'Shop domain not found' });
+      return;
     }
 
     // Get access token from session or environment
     const accessToken = req.headers['x-shopify-access-token'] as string || process.env.SHOPIFY_ACCESS_TOKEN;
     
     if (!accessToken) {
-      return res.status(400).json({ error: 'Access token not found' });
+      res.status(400).json({ error: 'Access token not found' });
+      return;
     }
 
     // Use the exact mutation from the user's request

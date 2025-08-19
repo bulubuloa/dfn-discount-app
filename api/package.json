@@ -2,7 +2,7 @@
   "name": "dfn-discount-api",
   "version": "1.0.0",
   "description": "TypeScript Node.js API for Shopify discount functions :)",
-  "main": "dist/index.js",
+  "main": "index.ts",
   "type": "module",
   "engines": {
     "node": ">=18.0.0"

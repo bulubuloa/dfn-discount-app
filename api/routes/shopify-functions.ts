@@ -18,20 +18,22 @@ interface GraphQLResponse {
   errors?: any[];
 }
 
-export const shopifyFunctionsHandler = async (req: Request, res: Response) => {
+export const shopifyFunctionsHandler = async (req: Request, res: Response): Promise<void> => {
   try {
     // Get the shop domain from the request headers or session
     const shop = req.headers['x-shopify-shop-domain'] as string || process.env.SHOPIFY_SHOP_DOMAIN;
     
     if (!shop) {
-      return res.status(400).json({ error: 'Shop domain not found' });
+      res.status(400).json({ error: 'Shop domain not found' });
+      return;
     }
 
     // Get access token from session or environment
     const accessToken = req.headers['x-shopify-access-token'] as string || process.env.SHOPIFY_ACCESS_TOKEN;
     
     if (!accessToken) {
-      return res.status(400).json({ error: 'Access token not found' });
+      res.status(400).json({ error: 'Access token not found' });
+      return;
     }
 
     // GraphQL query to get function ID - using the exact query from the user
