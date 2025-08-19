@@ -337,6 +337,21 @@ export default function Index() {
 
               <Stack distribution="center" spacing="tight">
                 <Button 
+                  size="small"
+                  onClick={async () => {
+                    try {
+                      const response = await fetch('/api/test');
+                      const data = await response.json();
+                      setResult({ type: 'success', message: `✅ Test API: ${data.message}` });
+                    } catch (error) {
+                      setResult({ type: 'error', message: `❌ Test API failed: ${error.message}` });
+                    }
+                  }}
+                >
+                  🧪 Test API
+                </Button>
+                
+                <Button 
                   primary
                   size="large"
                   onClick={getFunctionId}

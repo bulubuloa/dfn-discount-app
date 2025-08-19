@@ -69,8 +69,15 @@ app.post("/api/products", async (_req, res) => {
   res.status(status).send({ success: status === 200, error });
 });
 
+// Test endpoint for debugging
+app.get("/api/test", (req, res) => {
+  console.log("Test endpoint hit");
+  res.json({ message: "API is working!", timestamp: new Date().toISOString() });
+});
+
 // Discount API routes
 app.get("/api/get-function-id", async (req, res) => {
+  console.log("Get function ID endpoint hit");
   try {
     const client = new shopify.api.clients.Graphql({
       session: res.locals.shopify.session,
@@ -91,7 +98,9 @@ app.get("/api/get-function-id", async (req, res) => {
       }
     `;
 
+    console.log("Making GraphQL request...");
     const data = await client.request(GET_FUNCTIONS);
+    console.log("GraphQL response:", data);
     
     // Find our function
     const ourFunction = data.shopifyFunctions.nodes.find(
@@ -99,9 +108,11 @@ app.get("/api/get-function-id", async (req, res) => {
     );
 
     if (!ourFunction) {
+      console.log("Function not found in response");
       return res.status(404).json({ error: 'Function not found. Make sure the function is deployed.' });
     }
 
+    console.log("Function found:", ourFunction);
     return res.status(200).json({ 
       functionId: ourFunction.id,
       functionTitle: ourFunction.title,
