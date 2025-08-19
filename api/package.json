@@ -1,0 +1,29 @@
+{
+  "name": "dfn-discount-api",
+  "version": "1.0.0",
+  "description": "Serverless API for Shopify discount functions",
+  "main": "index.js",
+  "type": "module",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel --prod"
+  },
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "vercel": "^32.0.0"
+  },
+  "keywords": [
+    "shopify",
+    "discount",
+    "serverless",
+    "vercel",
+    "api"
+  ],
+  "author": "hoangq",
+  "license": "UNLICENSED"
+}
