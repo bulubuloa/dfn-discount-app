@@ -317,12 +317,14 @@ app.post("/api/create-discount-simple", shopify.validateAuthenticatedSession(), 
     }
 
     const discountData = await discountResponse.json();
+    console.log('Discount response data:', JSON.stringify(discountData, null, 2));
     
     if (discountData.errors) {
       throw new Error(`GraphQL errors: ${JSON.stringify(discountData.errors)}`);
     }
 
     const result = discountData.data?.discountAutomaticAppCreate;
+    console.log('Discount creation result:', JSON.stringify(result, null, 2));
     
     if (result.userErrors && result.userErrors.length > 0) {
       throw new Error(`Discount creation failed: ${result.userErrors.map(e => e.message).join(', ')}`);
@@ -330,6 +332,10 @@ app.post("/api/create-discount-simple", shopify.validateAuthenticatedSession(), 
 
     if (!result.automaticAppDiscount) {
       throw new Error('Discount creation failed: No discount returned');
+    }
+
+    if (!result.automaticAppDiscount.discountId) {
+      throw new Error('Discount creation failed: No discount ID returned');
     }
 
     console.log('Discount created successfully:', result.automaticAppDiscount.discountId);
@@ -346,72 +352,11 @@ app.post("/api/create-discount-simple", shopify.validateAuthenticatedSession(), 
   } catch (error) {
     console.error('Error creating discount automatically:', error);
     
-    // Fallback to instructions if automatic creation fails
-    const fallbackInstructions = {
-      message: 'Automatic creation failed. Copy and paste these queries into GraphiQL (press "g" in your terminal):',
-      steps: [
-        {
-          step: 1,
-          title: 'Get Function ID',
-          description: 'Run this query in GraphiQL to get your function ID:',
-          query: `query {
-  shopifyFunctions(first: 25) {
-    nodes {
-      app {
-        title
-      }
-      apiType
-      title
-      id
-    }
-  }
-}`,
-          note: 'Copy the "id" value from the response'
-        },
-        {
-          step: 2,
-          title: 'Create Discount',
-          description: 'Replace YOUR_FUNCTION_ID_HERE with the ID from step 1, then run this mutation:',
-          query: `mutation {
-  discountAutomaticAppCreate(
-    automaticAppDiscount: {
-      title: "${req.body?.title || 'DFN Auto Discount'}"
-      functionId: "YOUR_FUNCTION_ID_HERE"
-      discountClasses: [PRODUCT, ORDER, SHIPPING]
-      startsAt: "${new Date().toISOString()}"
-    }
-  ) {
-    automaticAppDiscount {
-      discountId
-      title
-      status
-    }
-    userErrors {
-      field
-      message
-    }
-  }
-}`,
-          note: 'If successful, you\'ll see a discountId in the response'
-        }
-      ],
-      config: req.body?.config || {},
-      quickStart: {
-        message: 'Quick Start:',
-        instructions: [
-          '1. Press "g" in your terminal to open GraphiQL',
-          '2. Copy the first query above and run it',
-          '3. Copy the function ID from the response',
-          '4. Replace "YOUR_FUNCTION_ID_HERE" in the second query with your function ID',
-          '5. Run the second query to create the discount'
-        ]
-      }
-    };
-    
-    res.status(200).json({
+        // Return error response instead of fake success
+    res.status(500).json({
       success: false,
       error: error.message,
-      instructions: fallbackInstructions
+      details: 'Automatic discount creation failed. Please check the console for details.'
     });
   }
 });

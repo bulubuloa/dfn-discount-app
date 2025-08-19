@@ -54,7 +54,7 @@ export default function Index() {
       console.log('Creating discount using Shopify Admin API...');
       
       // Try to use the Shopify Admin API directly
-      const response = await fetch('./api/create-discount-simple', {
+      const response = await fetch('/api/create-discount-simple', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -77,7 +77,7 @@ export default function Index() {
       const data = await response.json();
       console.log('Response data:', data);
       
-      if (data.success) {
+      if (data.success && data.discountId) {
         setResult({ 
           type: 'success', 
           message: `✅ Discount created successfully! ID: ${data.discountId}. The discount is now active in your store.`,
@@ -89,11 +89,10 @@ export default function Index() {
           }
         });
       } else {
-        // Show fallback instructions if automatic creation failed
+        // Show error message
         setResult({ 
-          type: 'warning', 
-          message: `⚠️ Automatic creation failed: ${data.error}. Using manual instructions below.`,
-          instructions: data.instructions
+          type: 'error', 
+          message: `❌ Automatic creation failed: ${data.error || 'Unknown error'}. ${data.details || ''}`,
         });
       }
       
