@@ -25,15 +25,6 @@ description = "t:description"
   network_access = false
   api_access = false
 
-  [extensions.settings]
-  type = "object"
-  fields = [
-    { key = "discountClasses", type = "list", name = "Discount Classes" },
-    { key = "discountPercentage", type = "number", name = "Discount Percentage" },
-    { key = "minimumOrderAmount", type = "number", name = "Minimum Order Amount" },
-    { key = "usageLimit", type = "number", name = "Usage Limit" }
-  ]
-
   [[extensions.ui_paths]]
   target = "admin"
   path = "config"

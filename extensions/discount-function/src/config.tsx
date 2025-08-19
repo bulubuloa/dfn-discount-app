@@ -1,3 +1,4 @@
+import React, { useState, useCallback, useEffect } from "react";
 import {
   Page,
   Layout,
@@ -5,21 +6,38 @@ import {
   Text,
   Stack,
   TextField,
-  Select,
   Button,
   FormLayout,
   Banner,
 } from "@shopify/polaris";
-import { useState, useCallback } from "react";
+
+// Type declaration for Shopify window object
+declare global {
+  interface Window {
+    shopify?: {
+      config?: {
+        save: (config: any) => Promise<void>;
+        close: () => void;
+      };
+    };
+  }
+}
 
 export default function Config() {
   const [config, setConfig] = useState({
     orderDiscountPercent: 20,
     productDiscountPercent: 15,
     shippingDiscountPercent: 50,
-    minimumOrderAmount: 0,
-    discountClasses: ["ORDER", "PRODUCT", "SHIPPING"],
   });
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Check if we're in Shopify's config context
+  useEffect(() => {
+    if (window.shopify && window.shopify.config) {
+      console.log("In Shopify config context");
+    }
+  }, []);
 
   const handleConfigChange = useCallback((field: string, value: any) => {
     setConfig(prev => ({
@@ -28,18 +46,45 @@ export default function Config() {
     }));
   }, []);
 
-  const handleSave = useCallback(() => {
-    // Save configuration to Shopify
+  const handleSave = useCallback(async () => {
+    setIsLoading(true);
+    
+    try {
+      // Save configuration to Shopify
+      if (window.shopify && window.shopify.config) {
+        // Convert config to the format Shopify expects
+        const shopifyConfig = {
+          orderDiscountPercent: config.orderDiscountPercent,
+          productDiscountPercent: config.productDiscountPercent,
+          shippingDiscountPercent: config.shippingDiscountPercent,
+        };
+        
+        console.log("Saving configuration:", shopifyConfig);
+        
+        // Save the configuration
+        await window.shopify.config.save(shopifyConfig);
+        
+        // Close the config window
+        window.shopify.config.close();
+      } else {
+        console.log("Not in Shopify config context, saving locally");
+        // For testing outside of Shopify context
+        localStorage.setItem('dfn-discount-config', JSON.stringify(config));
+        alert('Configuration saved! Now create a discount in Shopify and select this app.');
+      }
+    } catch (error) {
+      console.error("Error saving configuration:", error);
+      alert('Error saving configuration. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [config]);
+
+  const handleCancel = useCallback(() => {
     if (window.shopify && window.shopify.config) {
       window.shopify.config.close();
     }
   }, []);
-
-  const discountClassOptions = [
-    { label: "Order Discount", value: "ORDER" },
-    { label: "Product Discount", value: "PRODUCT" },
-    { label: "Shipping Discount", value: "SHIPPING" },
-  ];
 
   return (
     <Page title="Configure DFN Discount App">
@@ -49,9 +94,8 @@ export default function Config() {
             <Stack vertical spacing="loose">
               <Banner
                 title="Configure Your Discount Function"
-                tone="info"
               >
-                <p>Set up your discount percentages and conditions. These settings will be used when the discount function runs.</p>
+                <p>Set up your discount percentages. These settings will be used when the discount function runs.</p>
               </Banner>
               
               <FormLayout>
@@ -68,6 +112,7 @@ export default function Config() {
                   min={0}
                   max={100}
                   helpText="Percentage off entire order subtotal"
+                  autoComplete="off"
                 />
                 
                 <TextField
@@ -79,6 +124,7 @@ export default function Config() {
                   min={0}
                   max={100}
                   helpText="Percentage off individual products"
+                  autoComplete="off"
                 />
                 
                 <TextField
@@ -90,30 +136,15 @@ export default function Config() {
                   min={0}
                   max={100}
                   helpText="Percentage off shipping costs"
-                />
-                
-                <TextField
-                  label="Minimum Order Amount"
-                  type="number"
-                  value={config.minimumOrderAmount.toString()}
-                  onChange={(value) => handleConfigChange('minimumOrderAmount', parseFloat(value) || 0)}
-                  prefix="$"
-                  min={0}
-                  helpText="Minimum order value to qualify for discount (0 = no minimum)"
-                />
-                
-                <Select
-                  label="Discount Classes"
-                  options={discountClassOptions}
-                  value={config.discountClasses}
-                  onChange={(value) => handleConfigChange('discountClasses', value)}
-                  helpText="Types of discounts this function can apply"
-                  multiple
+                  autoComplete="off"
                 />
               </FormLayout>
               
               <Stack distribution="trailing">
-                <Button primary onClick={handleSave}>
+                <Button onClick={handleCancel} disabled={isLoading}>
+                  Cancel
+                </Button>
+                <Button primary onClick={handleSave} loading={isLoading}>
                   Save Configuration
                 </Button>
               </Stack>
