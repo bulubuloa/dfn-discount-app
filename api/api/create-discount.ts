@@ -1,28 +1,51 @@
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+import { Request, Response } from 'express';
 
+interface CreateDiscountRequest {
+  functionId: string;
+  title?: string;
+  startsAt?: string;
+  discountClasses?: string;
+}
+
+interface DiscountResponse {
+  data?: {
+    discountAutomaticAppCreate?: {
+      automaticAppDiscount?: {
+        discountId: string;
+      };
+      userErrors?: Array<{
+        field: string;
+        message: string;
+      }>;
+    };
+  };
+  errors?: any[];
+}
+
+export const createDiscountHandler = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { functionId, title, startsAt, discountClasses } = req.body;
+    const { functionId, title, startsAt, discountClasses }: CreateDiscountRequest = req.body;
 
     // Validate required parameters
     if (!functionId) {
-      return res.status(400).json({ error: 'functionId is required' });
+      res.status(400).json({ error: 'functionId is required' });
+      return;
     }
 
     // Get the shop domain from the request headers or session
-    const shop = req.headers['x-shopify-shop-domain'] || process.env.SHOPIFY_SHOP_DOMAIN;
+    const shop = req.headers['x-shopify-shop-domain'] as string || process.env.SHOPIFY_SHOP_DOMAIN;
     
     if (!shop) {
-      return res.status(400).json({ error: 'Shop domain not found' });
+      res.status(400).json({ error: 'Shop domain not found' });
+      return;
     }
 
     // Get access token from session or environment
-    const accessToken = req.headers['x-shopify-access-token'] || process.env.SHOPIFY_ACCESS_TOKEN;
+    const accessToken = req.headers['x-shopify-access-token'] as string || process.env.SHOPIFY_ACCESS_TOKEN;
     
     if (!accessToken) {
-      return res.status(400).json({ error: 'Access token not found' });
+      res.status(400).json({ error: 'Access token not found' });
+      return;
     }
 
     // Use the exact mutation from the user's request
@@ -60,7 +83,7 @@ export default async function handler(req, res) {
       throw new Error(`GraphQL request failed: ${response.status}`);
     }
 
-    const data = await response.json();
+    const data: DiscountResponse = await response.json();
     
     if (data.errors) {
       throw new Error(`GraphQL errors: ${JSON.stringify(data.errors)}`);
@@ -68,11 +91,11 @@ export default async function handler(req, res) {
 
     const result = data.data?.discountAutomaticAppCreate;
     
-    if (result.userErrors && result.userErrors.length > 0) {
+    if (result?.userErrors && result.userErrors.length > 0) {
       throw new Error(`Discount creation failed: ${result.userErrors.map(e => e.message).join(', ')}`);
     }
 
-    if (!result.automaticAppDiscount) {
+    if (!result?.automaticAppDiscount) {
       throw new Error('Discount creation failed: No discount returned');
     }
 
@@ -89,7 +112,7 @@ export default async function handler(req, res) {
     
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: error instanceof Error ? error.message : 'Unknown error',
       instructions: {
         message: 'Automatic creation failed. Please use GraphiQL manually:',
         steps: [
@@ -119,4 +142,4 @@ export default async function handler(req, res) {
       }
     });
   }
-}
+};
