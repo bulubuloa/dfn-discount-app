@@ -62,7 +62,7 @@ export default function Index() {
       }
       
       // Use the new backend API
-      const response = await fetch(`https://dfn-discount-app-backend.vercel.app/api/discount-workflow`, {
+      const response = await fetch(`https://dfn-discount-app-api.vercel.app/api/discount-workflow`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
