@@ -21,9 +21,17 @@ const createMockRes = () => {
       this.statusCode = code;
       return this;
     },
+    setHeader: function(name, value) {
+      this.headers[name] = value;
+      return this;
+    },
     json: function(data) {
       this.body = data;
       console.log(`Response (${this.statusCode}):`, JSON.stringify(data, null, 2));
+      return this;
+    },
+    end: function() {
+      console.log(`Response (${this.statusCode}): [CORS preflight]`);
       return this;
     }
   };
