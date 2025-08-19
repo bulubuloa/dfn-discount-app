@@ -51,49 +51,100 @@ export default function Index() {
     try {
       setResult({ type: 'info', message: '🔍 Creating discount automatically...' });
       
-      console.log('Creating discount using Shopify Admin API...');
+      console.log('Creating discount using Shopify App Bridge...');
       
-      // Try to use the Shopify Admin API directly
-      const response = await fetch('/api/create-discount-simple', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          title: "DFN Auto Discount",
-          message: "🎉 Special discount applied automatically!",
-          config
-        }),
-      });
-      
-      console.log('Response status:', response.status);
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Response error text:', errorText);
-        throw new Error(`HTTP ${response.status}: ${errorText}`);
-      }
-      
-      const data = await response.json();
-      console.log('Response data:', data);
-      
-      if (data.success && data.discountId) {
+      // Check if we're in a Shopify app context
+      if (typeof window !== 'undefined' && window.shopify && window.shopify.config && window.shopify.config.api) {
+        const client = window.shopify.config.api;
+        
+        // Step 1: Get Function ID
+        const functionQuery = `
+          query {
+            shopifyFunctions(first: 25) {
+              nodes {
+                app {
+                  title
+                }
+                apiType
+                title
+                id
+              }
+            }
+          }
+        `;
+        
+        console.log('Getting function ID...');
+        const functionResponse = await client.request(functionQuery);
+        console.log('Function response:', functionResponse);
+        
+        // Find the discount function
+        const functions = functionResponse.data?.shopifyFunctions?.nodes || [];
+        const discountFunction = functions.find(func =>
+          func.apiType === 'discounts' &&
+          (func.title === 'discount-function-js' || func.title === 'DFN Discount App')
+        );
+        
+        if (!discountFunction) {
+          throw new Error('Discount function not found. Make sure the function is deployed.');
+        }
+        
+        console.log('Found function:', discountFunction.id);
+        
+        // Step 2: Create the discount
+        const mutation = `
+          mutation {
+            discountAutomaticAppCreate(
+              automaticAppDiscount: {
+                title: "DFN Auto Discount"
+                functionId: "${discountFunction.id}"
+                discountClasses: [PRODUCT, ORDER, SHIPPING]
+                startsAt: "${new Date().toISOString()}"
+              }
+            ) {
+              automaticAppDiscount {
+                discountId
+                title
+                status
+              }
+              userErrors {
+                field
+                message
+              }
+            }
+          }
+        `;
+        
+        console.log('Creating discount...');
+        const discountResponse = await client.request(mutation);
+        console.log('Discount response:', discountResponse);
+        
+        const result = discountResponse.data?.discountAutomaticAppCreate;
+        
+        if (result.userErrors && result.userErrors.length > 0) {
+          throw new Error(`Discount creation failed: ${result.userErrors.map(e => e.message).join(', ')}`);
+        }
+        
+        if (!result.automaticAppDiscount) {
+          throw new Error('Discount creation failed: No discount returned');
+        }
+        
+        if (!result.automaticAppDiscount.discountId) {
+          throw new Error('Discount creation failed: No discount ID returned');
+        }
+        
         setResult({ 
           type: 'success', 
-          message: `✅ Discount created successfully! ID: ${data.discountId}. The discount is now active in your store.`,
+          message: `✅ Discount created successfully! ID: ${result.automaticAppDiscount.discountId}. The discount is now active in your store.`,
           discountInfo: {
-            id: data.discountId,
-            title: data.title,
-            status: data.status,
-            functionId: data.functionId
+            id: result.automaticAppDiscount.discountId,
+            title: result.automaticAppDiscount.title,
+            status: result.automaticAppDiscount.status,
+            functionId: discountFunction.id
           }
         });
+        
       } else {
-        // Show error message
-        setResult({ 
-          type: 'error', 
-          message: `❌ Automatic creation failed: ${data.error || 'Unknown error'}. ${data.details || ''}`,
-        });
+        throw new Error('Shopify App Bridge not available. Please access this app from within Shopify Admin.');
       }
       
     } catch (error) {
