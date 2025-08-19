@@ -101,7 +101,7 @@ dfn-discount-app/
 
 ## 📋 Usage
 
-### Creating a Discount
+### Method 1: Manual Discount Creation (Shopify Admin)
 
 1. Deploy the app to your Shopify store
 2. In your Shopify admin, go to **Discounts**
@@ -111,6 +111,96 @@ dfn-discount-app/
 6. Configure discount classes (Order, Product, or both)
 7. Set conditions and restrictions as needed
 8. Activate the discount
+
+### Method 2: Programmatic Discount Creation (GraphiQL)
+
+For advanced users who want to create discounts programmatically using the Shopify Admin API:
+
+#### Step 1: Open GraphiQL Interface
+
+1. Start your Shopify app in development mode:
+   ```bash
+   npm run dev
+   ```
+
+2. In the terminal where your app is running, press **`g`** to open the GraphiQL interface
+
+3. Select the latest stable API version in the GraphiQL interface
+
+#### Step 2: Get Your Function ID
+
+Run this query in GraphiQL to get your function ID:
+
+```graphql
+query {
+  shopifyFunctions(first: 25) {
+    nodes {
+      app {
+        title
+      }
+      apiType
+      title
+      id
+    }
+  }
+}
+```
+
+Copy the `id` value from the response. It will look like: `gid://shopify/Function/123456789`
+
+#### Step 3: Create the Discount
+
+Use this mutation to create an automatic app discount:
+
+```graphql
+mutation {
+  discountAutomaticAppCreate(
+    automaticAppDiscount: {
+      title: "Cart line, Order, Shipping discount"
+      functionId: "YOUR_FUNCTION_ID_HERE"
+      discountClasses: [PRODUCT, ORDER, SHIPPING]
+      startsAt: "2025-01-01T00:00:00"
+    }
+  ) {
+    automaticAppDiscount {
+      discountId
+    }
+    userErrors {
+      field
+      message
+    }
+  }
+}
+```
+
+**Important:** Replace `YOUR_FUNCTION_ID_HERE` with the actual function ID from Step 2.
+
+#### Step 4: Verify Success
+
+If successful, you'll receive a response like:
+
+```json
+{
+  "data": {
+    "discountAutomaticAppCreate": {
+      "automaticAppDiscount": {
+        "discountId": "gid://shopify/DiscountAutomaticNode/123456789"
+      },
+      "userErrors": []
+    }
+  }
+}
+```
+
+### Method 3: Using the App Interface
+
+The app also provides a user-friendly interface for:
+- Getting function IDs automatically
+- Creating discounts with custom configurations
+- Testing discount functionality
+- Debugging function behavior
+
+Navigate to the app's main interface and use the "Quick Setup" section for automated discount creation.
 
 ### Discount Classes
 
@@ -196,12 +286,55 @@ The app requires the following Shopify permissions:
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
+## 🔧 Troubleshooting
+
+### GraphiQL Issues
+
+**GraphiQL won't open:**
+- Make sure your app is running in development mode (`npm run dev`)
+- Ensure you're pressing `g` in the correct terminal window
+- Check that you're logged into the correct Shopify store
+
+**Authentication errors:**
+- Verify you're logged into the correct Shopify store in your browser
+- Check that your app has the necessary permissions
+- Ensure your app is properly installed on the store
+
+**Function not found:**
+- Verify your function is properly deployed
+- Check that the app is installed on the store
+- Ensure you're using the correct function ID
+
+**Invalid function ID:**
+- Double-check the ID format (should start with `gid://shopify/Function/`)
+- Make sure you're copying the ID from the correct function
+- Verify the function belongs to your app
+
+### Common Error Messages
+
+**"Function not found" error:**
+```json
+{
+  "userErrors": [
+    {
+      "field": ["functionId"],
+      "message": "Function not found"
+    }
+  ]
+}
+```
+This usually means the function ID is incorrect or the function isn't properly deployed.
+
+**"Permission denied" error:**
+Make sure your app has the `write_discounts` permission and is properly installed on the store.
+
 ## 🆘 Support
 
 For support and questions:
 - Check the [Shopify documentation](https://shopify.dev/docs/apps/discounts)
 - Review the test files for usage examples
 - Check the Shopify Partner dashboard for deployment status
+- Use the app's built-in GraphiQL Setup page for step-by-step guidance
 
 ## 🎉 Acknowledgments
 

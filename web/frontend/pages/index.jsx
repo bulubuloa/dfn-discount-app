@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Page, Layout, Card, Text, Stack, Badge, Button, Banner, Icon, Box, TextField, Select, FormLayout, ButtonGroup, Spinner, Modal } from "@shopify/polaris";
+import { Page, Layout, Card, Text, Stack, Badge, Button, Banner, Icon, Box, TextField, Select, FormLayout, ButtonGroup, Spinner, Modal, List } from "@shopify/polaris";
 import { DiscountsMajor, CartMajor, DiscountAutomaticMajor } from "@shopify/polaris-icons";
 
 export default function Index() {
@@ -14,12 +14,7 @@ export default function Index() {
   });
 
   const [isConfiguring, setIsConfiguring] = useState(false);
-  const [functionId, setFunctionId] = useState(null);
-  const [isLoadingFunctionId, setIsLoadingFunctionId] = useState(false);
   const [isCreatingDiscount, setIsCreatingDiscount] = useState(false);
-  const [showCreateDiscountModal, setShowCreateDiscountModal] = useState(false);
-  const [discountTitle, setDiscountTitle] = useState("DFN Auto Discount");
-  const [discountMessage, setDiscountMessage] = useState("🎉 Special discount applied automatically!");
   const [result, setResult] = useState(null);
 
   useEffect(() => {
@@ -49,64 +44,47 @@ export default function Index() {
     alert('Configuration saved! Now create a discount in Shopify and select this app.');
   };
 
-  const getFunctionId = async () => {
-    setIsLoadingFunctionId(true);
-    try {
-      const response = await fetch('/api/get-function-id', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      setFunctionId(data.functionId);
-      setResult({ type: 'success', message: `✅ Function ID retrieved: ${data.functionId}` });
-    } catch (error) {
-      console.error('Error getting function ID:', error);
-      setResult({ type: 'error', message: `❌ Error getting Function ID: ${error.message}` });
-    } finally {
-      setIsLoadingFunctionId(false);
-    }
-  };
-
-  const createDiscount = async () => {
-    if (!functionId) {
-      setResult({ type: 'error', message: '❌ Please get the Function ID first!' });
-      return;
-    }
-
+  const createDiscountAutomatically = async () => {
     setIsCreatingDiscount(true);
+    setResult(null);
+    
     try {
-      const response = await fetch('/api/create-discount', {
+      setResult({ type: 'info', message: '🔍 Generating GraphQL queries...' });
+      
+      const response = await fetch('/api/create-discount-simple', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          functionId,
-          title: discountTitle,
-          message: discountMessage,
+          title: "DFN Auto Discount",
+          message: "🎉 Special discount applied automatically!",
           config
         }),
       });
       
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+        throw new Error('Failed to generate instructions');
       }
       
       const data = await response.json();
-      setResult({ type: 'success', message: `✅ Discount created successfully! ID: ${data.discountId}` });
-      setShowCreateDiscountModal(false);
+      
+      if (data.success) {
+        setResult({ 
+          type: 'success', 
+          message: `✅ Ready! Press 'g' in your terminal to open GraphiQL, then copy and paste the queries. Check the instructions below for details.`,
+          instructions: data.instructions
+        });
+      } else {
+        throw new Error(data.error || 'Failed to generate instructions');
+      }
+      
     } catch (error) {
-      console.error('Error creating discount:', error);
-      setResult({ type: 'error', message: `❌ Error creating discount: ${error.message}` });
+      console.error('Error:', error);
+      setResult({ 
+        type: 'error', 
+        message: `❌ Error: ${error.message}` 
+      });
     } finally {
       setIsCreatingDiscount(false);
     }
@@ -123,6 +101,94 @@ export default function Index() {
                 <Badge tone="success" size="large">Active & Ready</Badge>
                 <Badge tone="info" size="large">Automatic Discounts Available</Badge>
               </Stack>
+            </Stack>
+          </Card>
+        </Layout.Section>
+
+        {/* One-Click Discount Creation */}
+        <Layout.Section>
+          <Card sectioned>
+            <Stack vertical spacing="loose" alignment="center">
+              <Text variant="headingMd" as="h2" alignment="center">
+                🚀 One-Click Discount Creation
+              </Text>
+              
+              <Text variant="bodyMd" as="p" alignment="center" tone="subdued">
+                Click the button below to automatically get your Function ID and create a discount
+              </Text>
+
+              {result && (
+                <>
+                  <Banner
+                    title={result.message}
+                    tone={result.type === 'success' ? 'success' : result.type === 'error' ? 'critical' : 'info'}
+                  />
+                  
+                  {result.instructions && (
+                    <Card sectioned>
+                      <Stack vertical spacing="loose">
+                        <Text variant="headingSm" as="h3">
+                          📋 Step-by-Step Instructions
+                        </Text>
+                        
+                        {result.instructions.steps.map((step, index) => (
+                          <Card key={index} sectioned>
+                            <Stack vertical spacing="tight">
+                              <Text variant="headingSm" as="h4">
+                                Step {step.step}: {step.title}
+                              </Text>
+                              <Text variant="bodyMd" as="p">
+                                {step.description}
+                              </Text>
+                              <Card sectioned>
+                                <pre style={{ 
+                                  backgroundColor: '#f6f6f7', 
+                                  padding: '12px', 
+                                  borderRadius: '4px',
+                                  overflow: 'auto',
+                                  fontSize: '14px'
+                                }}>
+                                  {step.query}
+                                </pre>
+                              </Card>
+                              <Text variant="bodyMd" as="p" tone="subdued">
+                                <strong>Note:</strong> {step.note}
+                              </Text>
+                            </Stack>
+                          </Card>
+                        ))}
+                        
+                        <Card sectioned>
+                          <Stack vertical spacing="tight">
+                            <Text variant="headingSm" as="h4">
+                              🚀 Quick Start
+                            </Text>
+                            <List type="number">
+                              {result.instructions.quickStart.instructions.map((instruction, index) => (
+                                <List.Item key={index}>{instruction}</List.Item>
+                              ))}
+                            </List>
+                          </Stack>
+                        </Card>
+                      </Stack>
+                    </Card>
+                  )}
+                </>
+              )}
+
+              <Button 
+                primary
+                size="large"
+                onClick={createDiscountAutomatically}
+                loading={isCreatingDiscount}
+                disabled={isCreatingDiscount}
+              >
+                {isCreatingDiscount ? 'Creating Discount...' : '🎯 Create Discount Automatically'}
+              </Button>
+
+              <Banner tone="info">
+                <p><strong>What this does:</strong> Gets your Function ID → Creates discount with current settings → Activates it in your store</p>
+              </Banner>
             </Stack>
           </Card>
         </Layout.Section>
@@ -223,139 +289,38 @@ export default function Index() {
           </Card>
         </Layout.Section>
 
-        {/* Function ID & Discount Creation Section */}
+        {/* Navigation Section */}
         <Layout.Section>
           <Card sectioned>
             <Stack vertical spacing="loose">
-              <Text variant="headingMd" as="h2">
-                🚀 Quick Setup - Get Function ID & Create Discount
+              <Text variant="headingMd" as="h2" alignment="center">
+                🧭 Other Tools
               </Text>
               
-              <Text variant="bodyMd" as="p" tone="subdued">
-                Use these buttons to automatically get your Function ID and create a discount programmatically.
-              </Text>
-
-              {result && (
-                <Banner
-                  title={result.message}
-                  tone={result.type === 'success' ? 'success' : 'critical'}
-                />
-              )}
-
               <Stack distribution="center" spacing="tight">
                 <Button 
-                  size="small"
-                  onClick={async () => {
-                    try {
-                      const response = await fetch('/api/test');
-                      const data = await response.json();
-                      setResult({ type: 'success', message: `✅ Test API: ${data.message}` });
-                    } catch (error) {
-                      setResult({ type: 'error', message: `❌ Test API failed: ${error.message}` });
-                    }
-                  }}
-                >
-                  🧪 Test API
-                </Button>
-                
-                <Button 
-                  primary
                   size="large"
-                  onClick={getFunctionId}
-                  loading={isLoadingFunctionId}
-                  disabled={isLoadingFunctionId}
+                  url="/debug"
                 >
-                  🔍 Get Function ID
+                  🔍 Debug Function
                 </Button>
-                
                 <Button 
                   size="large"
-                  onClick={() => setShowCreateDiscountModal(true)}
-                  disabled={!functionId}
+                  url="/test-discount"
                 >
-                  🎯 Create Discount Automatically
+                  🧪 Test Discount
+                </Button>
+                <Button 
+                  size="large"
+                  url="/getting-started"
+                >
+                  📖 Getting Started
                 </Button>
               </Stack>
-
-              {functionId && (
-                <Card sectioned>
-                  <Stack vertical spacing="tight">
-                    <Text variant="headingSm" as="h3">
-                      ✅ Function ID Retrieved
-                    </Text>
-                    <Text variant="bodyMd" as="p">
-                      <strong>Function ID:</strong> <code>{functionId}</code>
-                    </Text>
-                    <Text variant="bodyMd" as="p" tone="subdued">
-                      This ID is now ready to use for creating discounts. Click "Create Discount Automatically" above to proceed.
-                    </Text>
-                  </Stack>
-                </Card>
-              )}
             </Stack>
           </Card>
         </Layout.Section>
       </Layout>
-      {/* Create Discount Modal */}
-      <Modal
-        open={showCreateDiscountModal}
-        onClose={() => setShowCreateDiscountModal(false)}
-        title="Create Automatic Discount"
-        primaryAction={{
-          content: 'Create Discount',
-          onAction: createDiscount,
-          loading: isCreatingDiscount,
-          disabled: isCreatingDiscount
-        }}
-        secondaryActions={[
-          {
-            content: 'Cancel',
-            onAction: () => setShowCreateDiscountModal(false),
-          },
-        ]}
-      >
-        <Modal.Section>
-          <Stack vertical spacing="loose">
-            <Text variant="bodyMd" as="p">
-              Configure your automatic discount settings:
-            </Text>
-            
-            <TextField
-              label="Discount Title"
-              value={discountTitle}
-              onChange={setDiscountTitle}
-              helpText="This will be the name of your discount in Shopify"
-            />
-            
-            <TextField
-              label="Discount Message"
-              value={discountMessage}
-              onChange={setDiscountMessage}
-              helpText="Message shown to customers when discount is applied"
-            />
-            
-            <Card sectioned>
-              <Stack vertical spacing="tight">
-                <Text variant="headingSm" as="h3">
-                  Discount Configuration
-                </Text>
-                <Text variant="bodyMd" as="p">
-                  • Order Discount: {config.orderDiscountPercent}% off
-                </Text>
-                <Text variant="bodyMd" as="p">
-                  • Product Discount: {config.productDiscountPercent}% off
-                </Text>
-                <Text variant="bodyMd" as="p">
-                  • Shipping Discount: {config.shippingDiscountPercent}% off
-                </Text>
-                <Text variant="bodyMd" as="p" tone="subdued">
-                  These settings will be applied to all qualifying carts automatically.
-                </Text>
-              </Stack>
-            </Card>
-          </Stack>
-        </Modal.Section>
-      </Modal>
     </Page>
   );
 }

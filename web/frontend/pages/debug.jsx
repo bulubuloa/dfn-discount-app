@@ -1,5 +1,5 @@
-import { Page, Layout, Card, Text, Stack, Button, Banner, Icon, Box, List } from "@shopify/polaris";
-import { PlayMajor, DiscountsMajor, CartMajor } from "@shopify/polaris-icons";
+import { Page, Layout, Card, Text, Stack, Button, Banner, Icon, Box, List, Badge } from "@shopify/polaris";
+import { PlayMajor, DiscountsMajor, CartMajor, AppsMajor } from "@shopify/polaris-icons";
 
 export default function Debug() {
   return (
@@ -19,6 +19,204 @@ export default function Debug() {
               <Text variant="bodyLg" as="p" alignment="center" tone="subdued">
                 Learn how to verify if your discount function is being triggered and troubleshoot issues.
               </Text>
+            </Stack>
+          </Card>
+        </Layout.Section>
+
+        {/* GraphiQL Interface Section */}
+        <Layout.Section>
+          <Card sectioned>
+            <Stack vertical spacing="loose">
+              <Stack alignment="center" spacing="tight">
+                <Icon source={AppsMajor} tone="info" />
+                <Text variant="headingMd" as="h2">
+                  🚀 GraphiQL Interface Setup
+                </Text>
+              </Stack>
+              
+              <Banner tone="info">
+                <p><strong>Prerequisite:</strong> Make sure your Shopify app is running in development mode. In your terminal, you should see a message like "Press g to open GraphiQL".</p>
+              </Banner>
+
+              <Stack vertical spacing="loose">
+                <Card sectioned>
+                  <Stack vertical spacing="loose">
+                    <Stack alignment="center" spacing="tight">
+                      <Badge tone="success">Step 1</Badge>
+                      <Text variant="headingSm" as="h3">
+                        Open GraphiQL Interface
+                      </Text>
+                    </Stack>
+                    
+                    <Stack vertical spacing="tight">
+                      <Text variant="bodyMd" as="p">
+                        <strong>In your terminal where the app is running:</strong>
+                      </Text>
+                      <Text variant="bodyMd" as="p">
+                        1. Press <strong>g</strong> to open the GraphiQL interface
+                      </Text>
+                      <Text variant="bodyMd" as="p">
+                        2. For <strong>API Version</strong>, select the latest stable release
+                      </Text>
+                      <Text variant="bodyMd" as="p">
+                        3. You should see the GraphiQL playground in your browser
+                      </Text>
+                    </Stack>
+                  </Stack>
+                </Card>
+
+                <Card sectioned>
+                  <Stack vertical spacing="loose">
+                    <Stack alignment="center" spacing="tight">
+                      <Badge tone="success">Step 2</Badge>
+                      <Text variant="headingSm" as="h3">
+                        Get Your Function ID
+                      </Text>
+                    </Stack>
+                    
+                    <Text variant="bodyMd" as="p">
+                      <strong>Copy and paste this query into the GraphiQL interface:</strong>
+                    </Text>
+                    
+                    <Card sectioned>
+                      <pre style={{ 
+                        backgroundColor: '#f6f6f7', 
+                        padding: '12px', 
+                        borderRadius: '4px',
+                        overflow: 'auto',
+                        fontSize: '14px',
+                        margin: 0
+                      }}>
+{`query {
+  shopifyFunctions(first: 25) {
+    nodes {
+      app {
+        title
+      }
+      apiType
+      title
+      id
+    }
+  }
+}`}
+                      </pre>
+                    </Card>
+                    
+                    <Stack vertical spacing="tight">
+                      <Text variant="bodyMd" as="p">
+                        <strong>Expected Response:</strong>
+                      </Text>
+                                                <Card sectioned>
+                            <pre style={{ 
+                              backgroundColor: '#f6f6f7', 
+                              padding: '12px', 
+                              borderRadius: '4px',
+                              overflow: 'auto',
+                              fontSize: '14px',
+                              margin: 0
+                            }}>
+{`{
+  "data": {
+    "shopifyFunctions": {
+      "nodes": [
+        {
+          "app": {
+            "title": "your-app-name-here"
+          },
+          "apiType": "discounts",
+          "title": "discount-function-js",
+          "id": "YOUR_FUNCTION_ID_HERE"
+        }
+      ]
+    }
+  }
+}`}
+                            </pre>
+                          </Card>
+                    </Stack>
+                    
+                    <Banner tone="warning">
+                      <p><strong>Important:</strong> Copy the <code>id</code> value from the response. You'll need this for the next step.</p>
+                    </Banner>
+                  </Stack>
+                </Card>
+
+                <Card sectioned>
+                  <Stack vertical spacing="loose">
+                    <Stack alignment="center" spacing="tight">
+                      <Badge tone="success">Step 3</Badge>
+                      <Text variant="headingSm" as="h3">
+                        Create the Discount
+                      </Text>
+                    </Stack>
+                    
+                    <Text variant="bodyMd" as="p">
+                      <strong>Replace "YOUR_FUNCTION_ID_HERE" with your actual function ID, then run this mutation:</strong>
+                    </Text>
+                    
+                    <Card sectioned>
+                      <pre style={{ 
+                        backgroundColor: '#f6f6f7', 
+                        padding: '12px', 
+                        borderRadius: '4px',
+                        overflow: 'auto',
+                        fontSize: '14px',
+                        margin: 0
+                      }}>
+{`mutation {
+  discountAutomaticAppCreate(
+    automaticAppDiscount: {
+      title: "Cart line, Order, Shipping discount"
+      functionId: "YOUR_FUNCTION_ID_HERE"
+      discountClasses: [PRODUCT, ORDER, SHIPPING]
+      startsAt: "2025-01-01T00:00:00"
+    }
+  ) {
+    automaticAppDiscount {
+      discountId
+    }
+    userErrors {
+      field
+      message
+    }
+  }
+}`}
+                      </pre>
+                    </Card>
+                    
+                    <Stack vertical spacing="tight">
+                      <Text variant="bodyMd" as="p">
+                        <strong>Expected Success Response:</strong>
+                      </Text>
+                                                <Card sectioned>
+                            <pre style={{ 
+                              backgroundColor: '#f6f6f7', 
+                              padding: '12px', 
+                              borderRadius: '4px',
+                              overflow: 'auto',
+                              fontSize: '14px',
+                              margin: 0
+                            }}>
+{`{
+  "data": {
+    "discountAutomaticAppCreate": {
+      "automaticAppDiscount": {
+        "discountId": "gid://shopify/DiscountAutomaticNode/123456789"
+      },
+      "userErrors": []
+    }
+  }
+}`}
+                            </pre>
+                          </Card>
+                    </Stack>
+                    
+                    <Banner tone="success">
+                      <p><strong>Success!</strong> If you see a <code>discountId</code> in the response, your discount has been created successfully. You can now test it in your store.</p>
+                    </Banner>
+                  </Stack>
+                </Card>
+              </Stack>
             </Stack>
           </Card>
         </Layout.Section>
@@ -191,6 +389,12 @@ export default function Debug() {
               <Stack distribution="center" spacing="tight">
                 <Button 
                   primary 
+                  size="large"
+                  url="/graphiql-setup"
+                >
+                  🚀 GraphiQL Setup
+                </Button>
+                <Button 
                   size="large"
                   onClick={() => window.open("https://admin.shopify.com/store/btsa-shop-staging/discounts", "_blank")}
                 >
