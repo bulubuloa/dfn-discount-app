@@ -51,6 +51,8 @@ export default function Index() {
     try {
       setResult({ type: 'info', message: '🔍 Generating GraphQL queries...' });
       
+      console.log('Making request to /api/create-discount-simple');
+      
       const response = await fetch('/api/create-discount-simple', {
         method: 'POST',
         headers: {
@@ -63,27 +65,107 @@ export default function Index() {
         }),
       });
       
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+      
       if (!response.ok) {
-        throw new Error('Failed to generate instructions');
+        const errorText = await response.text();
+        console.error('Response error text:', errorText);
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
       }
       
       const data = await response.json();
+      console.log('Response data:', data);
       
       if (data.success) {
         setResult({ 
           type: 'success', 
-          message: `✅ Ready! Press 'g' in your terminal to open GraphiQL, then copy and paste the queries. Check the instructions below for details.`,
-          instructions: data.instructions
+          message: `✅ Discount created successfully! ID: ${data.discountId}. The discount is now active in your store.`,
+          discountInfo: {
+            id: data.discountId,
+            title: data.title,
+            status: data.status,
+            functionId: data.functionId
+          }
         });
       } else {
-        throw new Error(data.error || 'Failed to generate instructions');
+        // Show fallback instructions if automatic creation failed
+        setResult({ 
+          type: 'warning', 
+          message: `⚠️ Automatic creation failed: ${data.error}. Using manual instructions below.`,
+          instructions: data.instructions
+        });
       }
       
     } catch (error) {
       console.error('Error:', error);
+      
+      // Fallback: provide instructions directly
+      const fallbackInstructions = {
+        message: 'Copy and paste these queries into GraphiQL (press "g" in your terminal):',
+        steps: [
+          {
+            step: 1,
+            title: 'Get Function ID',
+            description: 'Run this query in GraphiQL to get your function ID:',
+            query: `query {
+  shopifyFunctions(first: 25) {
+    nodes {
+      app {
+        title
+      }
+      apiType
+      title
+      id
+    }
+  }
+}`,
+            note: 'Copy the "id" value from the response'
+          },
+          {
+            step: 2,
+            title: 'Create Discount',
+            description: 'Replace YOUR_FUNCTION_ID_HERE with the ID from step 1, then run this mutation:',
+            query: `mutation {
+  discountAutomaticAppCreate(
+    automaticAppDiscount: {
+      title: "DFN Auto Discount"
+      functionId: "YOUR_FUNCTION_ID_HERE"
+      discountClasses: [PRODUCT, ORDER, SHIPPING]
+      startsAt: "${new Date().toISOString()}"
+    }
+  ) {
+    automaticAppDiscount {
+      discountId
+      title
+      status
+    }
+    userErrors {
+      field
+      message
+    }
+  }
+}`,
+            note: 'If successful, you\'ll see a discountId in the response'
+          }
+        ],
+        config: config,
+        quickStart: {
+          message: 'Quick Start:',
+          instructions: [
+            '1. Press "g" in your terminal to open GraphiQL',
+            '2. Copy the first query above and run it',
+            '3. Copy the function ID from the response',
+            '4. Replace "YOUR_FUNCTION_ID_HERE" in the second query with your function ID',
+            '5. Run the second query to create the discount'
+          ]
+        }
+      };
+      
       setResult({ 
-        type: 'error', 
-        message: `❌ Error: ${error.message}` 
+        type: 'warning', 
+        message: `⚠️ API Error: ${error.message}. Using fallback instructions below.`,
+        instructions: fallbackInstructions
       });
     } finally {
       setIsCreatingDiscount(false);
@@ -119,10 +201,39 @@ export default function Index() {
 
               {result && (
                 <>
-                  <Banner
-                    title={result.message}
-                    tone={result.type === 'success' ? 'success' : result.type === 'error' ? 'critical' : 'info'}
-                  />
+                                  <Banner
+                  title={result.message}
+                  tone={result.type === 'success' ? 'success' : result.type === 'error' ? 'critical' : result.type === 'warning' ? 'warning' : 'info'}
+                />
+                  
+                  {result.discountInfo && (
+                    <Card sectioned>
+                      <Stack vertical spacing="loose">
+                        <Text variant="headingSm" as="h3">
+                          ✅ Discount Created Successfully
+                        </Text>
+                        
+                        <Stack vertical spacing="tight">
+                          <Text variant="bodyMd" as="p">
+                            <strong>Discount ID:</strong> <code>{result.discountInfo.id}</code>
+                          </Text>
+                          <Text variant="bodyMd" as="p">
+                            <strong>Title:</strong> {result.discountInfo.title}
+                          </Text>
+                          <Text variant="bodyMd" as="p">
+                            <strong>Status:</strong> {result.discountInfo.status}
+                          </Text>
+                          <Text variant="bodyMd" as="p">
+                            <strong>Function ID:</strong> <code>{result.discountInfo.functionId}</code>
+                          </Text>
+                        </Stack>
+                        
+                        <Banner tone="success">
+                          <p><strong>🎉 Your discount is now active!</strong> Customers will automatically receive the discount when they meet the conditions.</p>
+                        </Banner>
+                      </Stack>
+                    </Card>
+                  )}
                   
                   {result.instructions && (
                     <Card sectioned>

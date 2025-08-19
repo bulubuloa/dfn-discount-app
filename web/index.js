@@ -212,14 +212,159 @@ app.post("/api/create-discount", shopify.validateAuthenticatedSession(), async (
   }
 });
 
-// Simple endpoint that provides GraphQL instructions (no authentication required)
-app.post("/api/create-discount-simple", (req, res) => {
+// Simple endpoint that automatically creates discount (no authentication required)
+app.post("/api/create-discount-simple", async (req, res) => {
   try {
     const { title, message, config } = req.body;
 
-    // Provide the exact GraphQL queries for manual execution
-    const instructions = {
-      message: 'Copy and paste these queries into GraphiQL (press "g" in your terminal):',
+    // Get the shop domain from the request headers or session
+    const shop = req.headers['x-shopify-shop-domain'] || process.env.SHOPIFY_SHOP_DOMAIN;
+    
+    if (!shop) {
+      return res.status(400).json({ 
+        success: false,
+        error: 'Shop domain not found. Please ensure you are accessing this from within Shopify.' 
+      });
+    }
+
+    // Get access token from session or environment
+    const accessToken = req.headers['x-shopify-access-token'] || process.env.SHOPIFY_ACCESS_TOKEN;
+    
+    if (!accessToken) {
+      return res.status(400).json({ 
+        success: false,
+        error: 'Access token not found. Please ensure you are authenticated with Shopify.' 
+      });
+    }
+
+    console.log('Creating discount automatically for shop:', shop);
+
+    // Step 1: Get Function ID
+    const functionResponse = await fetch(`https://${shop}/admin/api/2024-01/graphql.json`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Shopify-Access-Token': accessToken,
+      },
+      body: JSON.stringify({
+        query: `
+          query {
+            shopifyFunctions(first: 25) {
+              nodes {
+                app {
+                  title
+                }
+                apiType
+                title
+                id
+              }
+            }
+          }
+        `
+      }),
+    });
+
+    if (!functionResponse.ok) {
+      throw new Error(`Failed to get functions: ${functionResponse.status}`);
+    }
+
+    const functionData = await functionResponse.json();
+    
+    if (functionData.errors) {
+      throw new Error(`GraphQL errors: ${JSON.stringify(functionData.errors)}`);
+    }
+
+    // Find the discount function
+    const functions = functionData.data?.shopifyFunctions?.nodes || [];
+    const discountFunction = functions.find(func => 
+      func.apiType === 'discounts' && 
+      (func.title === 'discount-function-js' || func.title === 'DFN Discount App')
+    );
+
+    if (!discountFunction) {
+      throw new Error('Discount function not found. Make sure the function is deployed.');
+    }
+
+    console.log('Found function:', discountFunction.id);
+
+    // Step 2: Create the discount automatically
+    const mutation = `
+      mutation {
+        discountAutomaticAppCreate(
+          automaticAppDiscount: {
+            title: "${title || 'DFN Auto Discount'}"
+            functionId: "${discountFunction.id}"
+            discountClasses: [PRODUCT, ORDER, SHIPPING]
+            startsAt: "${new Date().toISOString()}"
+            metafields: [
+              {
+                namespace: "dfn"
+                key: "config"
+                type: "json"
+                value: "${JSON.stringify(config || {}).replace(/"/g, '\\"')}"
+              }
+            ]
+          }
+        ) {
+          automaticAppDiscount {
+            discountId
+            title
+            status
+          }
+          userErrors {
+            field
+            message
+          }
+        }
+      }
+    `;
+
+    const discountResponse = await fetch(`https://${shop}/admin/api/2024-01/graphql.json`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Shopify-Access-Token': accessToken,
+      },
+      body: JSON.stringify({ query: mutation }),
+    });
+
+    if (!discountResponse.ok) {
+      throw new Error(`Failed to create discount: ${discountResponse.status}`);
+    }
+
+    const discountData = await discountResponse.json();
+    
+    if (discountData.errors) {
+      throw new Error(`GraphQL errors: ${JSON.stringify(discountData.errors)}`);
+    }
+
+    const result = discountData.data?.discountAutomaticAppCreate;
+    
+    if (result.userErrors && result.userErrors.length > 0) {
+      throw new Error(`Discount creation failed: ${result.userErrors.map(e => e.message).join(', ')}`);
+    }
+
+    if (!result.automaticAppDiscount) {
+      throw new Error('Discount creation failed: No discount returned');
+    }
+
+    console.log('Discount created successfully:', result.automaticAppDiscount.discountId);
+
+    res.status(200).json({
+      success: true,
+      discountId: result.automaticAppDiscount.discountId,
+      title: result.automaticAppDiscount.title,
+      status: result.automaticAppDiscount.status,
+      message: 'Discount created successfully!',
+      functionId: discountFunction.id
+    });
+
+  } catch (error) {
+    console.error('Error creating discount automatically:', error);
+    
+    // Fallback to instructions if automatic creation fails
+    const fallbackInstructions = {
+      message: 'Automatic creation failed. Copy and paste these queries into GraphiQL (press "g" in your terminal):',
       steps: [
         {
           step: 1,
@@ -246,7 +391,7 @@ app.post("/api/create-discount-simple", (req, res) => {
           query: `mutation {
   discountAutomaticAppCreate(
     automaticAppDiscount: {
-      title: "${title || 'DFN Auto Discount'}"
+      title: "${req.body?.title || 'DFN Auto Discount'}"
       functionId: "YOUR_FUNCTION_ID_HERE"
       discountClasses: [PRODUCT, ORDER, SHIPPING]
       startsAt: "${new Date().toISOString()}"
@@ -266,7 +411,7 @@ app.post("/api/create-discount-simple", (req, res) => {
           note: 'If successful, you\'ll see a discountId in the response'
         }
       ],
-      config: config || {},
+      config: req.body?.config || {},
       quickStart: {
         message: 'Quick Start:',
         instructions: [
@@ -278,18 +423,11 @@ app.post("/api/create-discount-simple", (req, res) => {
         ]
       }
     };
-
+    
     res.status(200).json({
-      success: true,
-      instructions,
-      message: 'GraphQL queries ready for manual execution'
-    });
-
-  } catch (error) {
-    console.error('Error generating instructions:', error);
-    res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
+      instructions: fallbackInstructions
     });
   }
 });
