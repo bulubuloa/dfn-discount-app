@@ -49,52 +49,96 @@ export default function Index() {
     setResult(null);
     
     try {
-      setResult({ type: 'info', message: '🔍 Generating GraphQL queries...' });
+      setResult({ type: 'info', message: '🔍 Creating discount automatically...' });
       
-      console.log('Making request to /api/create-discount-simple');
+      console.log('Creating discount using Shopify App Bridge...');
       
-      const response = await fetch('/api/create-discount-simple', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          title: "DFN Auto Discount",
-          message: "🎉 Special discount applied automatically!",
-          config
-        }),
-      });
-      
-      console.log('Response status:', response.status);
-      console.log('Response headers:', response.headers);
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Response error text:', errorText);
-        throw new Error(`HTTP ${response.status}: ${errorText}`);
-      }
-      
-      const data = await response.json();
-      console.log('Response data:', data);
-      
-      if (data.success) {
+      // Check if we're in a Shopify app context
+      if (window.shopify && window.shopify.config) {
+        // We're in a Shopify app context, use App Bridge
+        const client = window.shopify.config.api;
+        
+        // Step 1: Get Function ID
+        const functionQuery = `
+          query {
+            shopifyFunctions(first: 25) {
+              nodes {
+                app {
+                  title
+                }
+                apiType
+                title
+                id
+              }
+            }
+          }
+        `;
+        
+        const functionResponse = await client.request(functionQuery);
+        console.log('Function response:', functionResponse);
+        
+        // Find the discount function
+        const functions = functionResponse.data?.shopifyFunctions?.nodes || [];
+        const discountFunction = functions.find(func => 
+          func.apiType === 'discounts' && 
+          (func.title === 'discount-function-js' || func.title === 'DFN Discount App')
+        );
+        
+        if (!discountFunction) {
+          throw new Error('Discount function not found. Make sure the function is deployed.');
+        }
+        
+        // Step 2: Create the discount
+        const mutation = `
+          mutation {
+            discountAutomaticAppCreate(
+              automaticAppDiscount: {
+                title: "DFN Auto Discount"
+                functionId: "${discountFunction.id}"
+                discountClasses: [PRODUCT, ORDER, SHIPPING]
+                startsAt: "${new Date().toISOString()}"
+              }
+            ) {
+              automaticAppDiscount {
+                discountId
+                title
+                status
+              }
+              userErrors {
+                field
+                message
+              }
+            }
+          }
+        `;
+        
+        const discountResponse = await client.request(mutation);
+        console.log('Discount response:', discountResponse);
+        
+        const result = discountResponse.data?.discountAutomaticAppCreate;
+        
+        if (result.userErrors && result.userErrors.length > 0) {
+          throw new Error(`Discount creation failed: ${result.userErrors.map(e => e.message).join(', ')}`);
+        }
+        
+        if (!result.automaticAppDiscount) {
+          throw new Error('Discount creation failed: No discount returned');
+        }
+        
         setResult({ 
           type: 'success', 
-          message: `✅ Discount created successfully! ID: ${data.discountId}. The discount is now active in your store.`,
+          message: `✅ Discount created successfully! ID: ${result.automaticAppDiscount.discountId}. The discount is now active in your store.`,
           discountInfo: {
-            id: data.discountId,
-            title: data.title,
-            status: data.status,
-            functionId: data.functionId
+            id: result.automaticAppDiscount.discountId,
+            title: result.automaticAppDiscount.title,
+            status: result.automaticAppDiscount.status,
+            functionId: discountFunction.id
           }
         });
+        
       } else {
-        // Show fallback instructions if automatic creation failed
-        setResult({ 
-          type: 'warning', 
-          message: `⚠️ Automatic creation failed: ${data.error}. Using manual instructions below.`,
-          instructions: data.instructions
-        });
+        // Fallback to manual instructions
+        throw new Error('Not in Shopify app context. Please use the manual GraphiQL method.');
       }
       
     } catch (error) {
@@ -164,7 +208,7 @@ export default function Index() {
       
       setResult({ 
         type: 'warning', 
-        message: `⚠️ API Error: ${error.message}. Using fallback instructions below.`,
+        message: `⚠️ ${error.message}. Using manual instructions below.`,
         instructions: fallbackInstructions
       });
     } finally {
@@ -201,10 +245,10 @@ export default function Index() {
 
               {result && (
                 <>
-                                  <Banner
-                  title={result.message}
-                  tone={result.type === 'success' ? 'success' : result.type === 'error' ? 'critical' : result.type === 'warning' ? 'warning' : 'info'}
-                />
+                  <Banner
+                    title={result.message}
+                    tone={result.type === 'success' ? 'success' : result.type === 'error' ? 'critical' : result.type === 'warning' ? 'warning' : 'info'}
+                  />
                   
                   {result.discountInfo && (
                     <Card sectioned>
@@ -257,7 +301,8 @@ export default function Index() {
                                   padding: '12px', 
                                   borderRadius: '4px',
                                   overflow: 'auto',
-                                  fontSize: '14px'
+                                  fontSize: '14px',
+                                  margin: 0
                                 }}>
                                   {step.query}
                                 </pre>
