@@ -1,5 +1,5 @@
 import { Page, Layout, Card, Text, Stack, Button, Banner, Icon, Box, List } from "@shopify/polaris";
-import { DiscountMajor, CartMajor, ShippingMajor, PlayMajor, CheckmarkMajor } from "@shopify/polaris-icons";
+import { DiscountsMajor, CartMajor, DiscountAutomaticMajor, PlayMajor } from "@shopify/polaris-icons";
 
 export default function GettingStarted() {
   return (
@@ -185,7 +185,7 @@ export default function GettingStarted() {
                 {/* Order Discount */}
                 <Card sectioned>
                   <Stack alignment="center" spacing="tight">
-                    <Icon source={DiscountMajor} tone="success" />
+                    <Icon source={DiscountsMajor} tone="success" />
                     <Box minWidth="0" flexGrow={1}>
                       <Text variant="headingSm" as="h3">
                         20% OFF ENTIRE ORDER
@@ -217,7 +217,7 @@ export default function GettingStarted() {
                 {/* Shipping Discount */}
                 <Card sectioned>
                   <Stack alignment="center" spacing="tight">
-                    <Icon source={ShippingMajor} tone="warning" />
+                    <Icon source={DiscountAutomaticMajor} tone="warning" />
                     <Box minWidth="0" flexGrow={1}>
                       <Text variant="headingSm" as="h3">
                         50% OFF SHIPPING

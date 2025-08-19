@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Page, Layout, Card, Text, Stack, Badge, Button, Banner, Icon, Box } from "@shopify/polaris";
-import { DiscountMajor, CartMajor, ShippingMajor } from "@shopify/polaris-icons";
+import { DiscountsMajor, CartMajor, DiscountAutomaticMajor } from "@shopify/polaris-icons";
 
 export default function Index() {
   useEffect(() => {
@@ -73,7 +73,7 @@ export default function Index() {
                 {/* Order Discount */}
                 <Card sectioned>
                   <Stack alignment="center" spacing="tight">
-                    <Icon source={DiscountMajor} tone="success" />
+                    <Icon source={DiscountsMajor} tone="success" />
                     <Box minWidth="0" flexGrow={1}>
                       <Text variant="headingSm" as="h3">
                         20% OFF ENTIRE ORDER
@@ -103,7 +103,7 @@ export default function Index() {
                 {/* Shipping Discount */}
                 <Card sectioned>
                   <Stack alignment="center" spacing="tight">
-                    <Icon source={ShippingMajor} tone="warning" />
+                    <Icon source={DiscountAutomaticMajor} tone="warning" />
                     <Box minWidth="0" flexGrow={1}>
                       <Text variant="headingSm" as="h3">
                         50% OFF SHIPPING
