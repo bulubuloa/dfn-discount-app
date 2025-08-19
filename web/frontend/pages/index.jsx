@@ -61,12 +61,13 @@ export default function Index() {
         throw new Error('Shop domain not found. Please access this app from within Shopify Admin.');
       }
       
-      // Use the new backend API
-      const response = await fetch(`https://dfn-discount-app-api.vercel.app/api/discount-workflow`, {
+      // Use the new real Shopify API endpoint
+      const response = await fetch(`https://dfn-discount-app-api.vercel.app/api/shopify-real`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Shopify-Shop-Domain': shop
+          'X-Shopify-Shop-Domain': shop,
+          'X-Shopify-Access-Token': window.shopify?.config?.apiKey || 'demo-token'
         },
         body: JSON.stringify({
           title: "DFN Auto Discount",

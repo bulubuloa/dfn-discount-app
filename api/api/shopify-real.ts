@@ -1,11 +1,34 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
+interface ShopifyFunction {
+  app: {
+    title: string;
+  };
+  apiType: string;
+  title: string;
+  id: string;
+}
+
+interface UserError {
+  field: string;
+  message: string;
+}
+
+interface DiscountResult {
+  automaticAppDiscount: {
+    discountId: string;
+    title: string;
+    status: string;
+  };
+  userErrors: UserError[];
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, x-shopify-shop-domain');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, x-shopify-shop-domain, x-shopify-access-token');
     res.setHeader('Access-Control-Max-Age', '86400');
     res.status(200).end();
     return;
@@ -19,11 +42,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
   // Set CORS headers for actual response
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, x-shopify-shop-domain');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, x-shopify-shop-domain, x-shopify-access-token');
 
   try {
     const { title, startsAt, discountClasses } = req.body;
     const shopDomain = req.headers['x-shopify-shop-domain'] as string;
+    const accessToken = req.headers['x-shopify-access-token'] as string;
 
     if (!shopDomain) {
       res.status(400).json({ 
@@ -33,6 +57,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
       return;
     }
 
+    if (!accessToken) {
+      res.status(400).json({ 
+        success: false, 
+        error: 'Shopify access token is required' 
+      });
+      return;
+    }
+
+    console.log('Getting function ID for shop:', shopDomain);
+    
     // Step 1: Get the Function ID using shopifyFunctions query
     // Based on Shopify documentation: https://shopify.dev/docs/apps/build/discounts/build-discount-function?extension=javascript
     const functionQuery = `
@@ -50,30 +84,28 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
       }
     `;
 
-    console.log('Getting function ID for shop:', shopDomain);
+    const functionResponse = await fetch(`https://${shopDomain}/admin/api/2024-01/graphql.json`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Shopify-Access-Token': accessToken,
+      },
+      body: JSON.stringify({ query: functionQuery }),
+    });
+
+    if (!functionResponse.ok) {
+      throw new Error(`Failed to get functions: ${functionResponse.status}`);
+    }
+
+    const functionData = await functionResponse.json();
     
-    // For now, we'll use mock data since we don't have Shopify access token
-    // In production, you would make the actual GraphQL request to Shopify
-    const mockFunctionData = {
-      data: {
-        shopifyFunctions: {
-          nodes: [
-            {
-              app: {
-                title: "DFN Discount App"
-              },
-              apiType: "discounts",
-              title: "discount-function-js",
-              id: "gid://shopify/Function/123"
-            }
-          ]
-        }
-      }
-    };
+    if (functionData.errors) {
+      throw new Error(`GraphQL errors: ${JSON.stringify(functionData.errors)}`);
+    }
 
     // Find the discount function
-    const functions = mockFunctionData.data.shopifyFunctions.nodes;
-    const discountFunction = functions.find(func => 
+    const functions = functionData.data?.shopifyFunctions?.nodes || [];
+    const discountFunction = functions.find((func: ShopifyFunction) => 
       func.apiType === 'discounts' && 
       (func.title === 'discount-function-js' || func.title === 'DFN Discount App')
     );
@@ -115,45 +147,39 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
 
     console.log('Creating discount with mutation:', discountMutation);
 
-    // For now, we'll use mock data since we don't have Shopify access token
-    // In production, you would make the actual GraphQL request to Shopify
-    const mockDiscountData = {
-      data: {
-        discountAutomaticAppCreate: {
-          automaticAppDiscount: {
-            discountId: "gid://shopify/DiscountAutomaticApp/456",
-            title: title || 'DFN Auto Discount',
-            status: "ACTIVE"
-          },
-          userErrors: []
-        }
-      }
-    };
+    const discountResponse = await fetch(`https://${shopDomain}/admin/api/2024-01/graphql.json`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Shopify-Access-Token': accessToken,
+      },
+      body: JSON.stringify({ query: discountMutation }),
+    });
 
-    const result = mockDiscountData.data.discountAutomaticAppCreate;
+    if (!discountResponse.ok) {
+      throw new Error(`Failed to create discount: ${discountResponse.status}`);
+    }
+
+    const discountData = await discountResponse.json();
+    console.log('Discount response data:', JSON.stringify(discountData, null, 2));
+    
+    if (discountData.errors) {
+      throw new Error(`GraphQL errors: ${JSON.stringify(discountData.errors)}`);
+    }
+
+    const result = discountData.data?.discountAutomaticAppCreate as DiscountResult;
+    console.log('Discount creation result:', JSON.stringify(result, null, 2));
     
     if (result.userErrors && result.userErrors.length > 0) {
-      res.status(400).json({ 
-        success: false, 
-        error: `Discount creation failed: ${result.userErrors.map((e: { message: string }) => e.message).join(', ')}` 
-      });
-      return;
+      throw new Error(`Discount creation failed: ${result.userErrors.map((e: UserError) => e.message).join(', ')}`);
     }
 
     if (!result.automaticAppDiscount) {
-      res.status(500).json({ 
-        success: false, 
-        error: 'Discount creation failed: No discount returned' 
-      });
-      return;
+      throw new Error('Discount creation failed: No discount returned');
     }
 
     if (!result.automaticAppDiscount.discountId) {
-      res.status(500).json({ 
-        success: false, 
-        error: 'Discount creation failed: No discount ID returned' 
-      });
-      return;
+      throw new Error('Discount creation failed: No discount ID returned');
     }
 
     console.log('Discount created successfully:', result.automaticAppDiscount.discountId);
