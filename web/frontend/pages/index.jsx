@@ -49,9 +49,9 @@ export default function Index() {
     setResult(null);
     
     try {
-      setResult({ type: 'info', message: '🔍 Creating discount automatically...' });
+      setResult({ type: 'info', message: '🔍 Creating discount automatically using new API...' });
       
-      console.log('Creating discount using Shopify App Bridge...');
+      console.log('Creating discount using new backend API...');
       
       // Get the current shop domain from the URL or session
       const urlParams = new URLSearchParams(window.location.search);
@@ -61,8 +61,8 @@ export default function Index() {
         throw new Error('Shop domain not found. Please access this app from within Shopify Admin.');
       }
       
-      // Use the backend API that has proper Shopify session
-      const response = await fetch(`/api/create-discount-simple?shop=${shop}`, {
+      // Use the new backend API
+      const response = await fetch(`https://dfn-discount-app-backend.vercel.app/api/discount-workflow`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -70,8 +70,8 @@ export default function Index() {
         },
         body: JSON.stringify({
           title: "DFN Auto Discount",
-          message: "🎉 Special discount applied automatically!",
-          config
+          startsAt: new Date().toISOString(),
+          discountClasses: "PRODUCT, ORDER, SHIPPING"
         }),
       });
       
@@ -86,15 +86,14 @@ export default function Index() {
       const data = await response.json();
       console.log('Response data:', data);
       
-      if (data.success && data.discountId) {
+      if (data.success && data.summary?.discountId) {
         setResult({ 
           type: 'success', 
-          message: `✅ Discount created successfully! ID: ${data.discountId}. The discount is now active in your store.`,
+          message: `✅ Discount created successfully! ID: ${data.summary.discountId}. The discount is now active in your store.`,
           discountInfo: {
-            id: data.discountId,
-            title: data.title,
-            status: data.status,
-            functionId: data.functionId
+            id: data.summary.discountId,
+            functionId: data.summary.functionId,
+            workflow: data.workflow
           }
         });
       } else {
@@ -418,6 +417,12 @@ export default function Index() {
               </Text>
               
               <Stack distribution="center" spacing="tight">
+                <Button 
+                  size="large"
+                  url="/api-test"
+                >
+                  🧪 API Test
+                </Button>
                 <Button 
                   size="large"
                   url="/debug"

@@ -1,13 +1,142 @@
-import { Page, Layout, Card, Text, Stack, Button, Banner, Icon, Box, List } from "@shopify/polaris";
+import { useState } from "react";
+import { Page, Layout, Card, Text, Stack, Button, Banner, Icon, Box, List, Spinner } from "@shopify/polaris";
 import { PlayMajor, DiscountsMajor, CartMajor } from "@shopify/polaris-icons";
 
 export default function TestDiscount() {
+  const [isCreatingDiscount, setIsCreatingDiscount] = useState(false);
+  const [result, setResult] = useState(null);
+
+  const createDiscountAutomatically = async () => {
+    setIsCreatingDiscount(true);
+    setResult(null);
+    
+    try {
+      setResult({ type: 'info', message: '🔍 Creating discount automatically using new API...' });
+      
+      console.log('Creating discount using new backend API...');
+      
+      // Get the current shop domain from the URL or session
+      const urlParams = new URLSearchParams(window.location.search);
+      const shop = urlParams.get('shop') || window.location.hostname.replace('.myshopify.com', '');
+      
+      if (!shop) {
+        throw new Error('Shop domain not found. Please access this app from within Shopify Admin.');
+      }
+      
+      // Use the new backend API
+      const response = await fetch(`https://dfn-discount-app-backend.vercel.app/api/discount-workflow`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Shopify-Shop-Domain': shop
+        },
+        body: JSON.stringify({
+          title: "DFN Test Discount",
+          startsAt: new Date().toISOString(),
+          discountClasses: "PRODUCT, ORDER, SHIPPING"
+        }),
+      });
+      
+      console.log('Response status:', response.status);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Response error text:', errorText);
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
+      }
+      
+      const data = await response.json();
+      console.log('Response data:', data);
+      
+      if (data.success && data.summary?.discountId) {
+        setResult({ 
+          type: 'success', 
+          message: `✅ Test discount created successfully! ID: ${data.summary.discountId}. You can now test it in your store.`,
+          discountInfo: {
+            id: data.summary.discountId,
+            functionId: data.summary.functionId,
+            workflow: data.workflow
+          }
+        });
+      } else {
+        setResult({ 
+          type: 'error', 
+          message: `❌ Automatic creation failed: ${data.error || 'Unknown error'}. ${data.details || ''}`,
+        });
+      }
+      
+    } catch (error) {
+      console.error('Error:', error);
+      setResult({ 
+        type: 'error', 
+        message: `❌ Error creating discount: ${error.message}`,
+      });
+    } finally {
+      setIsCreatingDiscount(false);
+    }
+  };
+
   return (
     <Page 
       title="Test Your Discount Function"
       backAction={{ content: 'Home', url: '/' }}
     >
       <Layout>
+        {/* Auto-Create Discount Section */}
+        <Layout.Section>
+          <Card sectioned>
+            <Stack vertical spacing="loose" alignment="center">
+              <Icon source={DiscountsMajor} tone="success" />
+              <Text variant="headingLg" as="h1" alignment="center">
+                🚀 Auto-Create Test Discount
+              </Text>
+              <Text variant="bodyLg" as="p" alignment="center" tone="subdued">
+                Create a test discount automatically using our new API
+              </Text>
+              
+              {result && (
+                <Banner
+                  title={result.type === 'success' ? 'Success!' : result.type === 'error' ? 'Error' : 'Info'}
+                  tone={result.type}
+                >
+                  <p>{result.message}</p>
+                  {result.discountInfo && (
+                    <div style={{ marginTop: '8px' }}>
+                      <Text variant="bodySm" as="p">
+                        <strong>Discount ID:</strong> {result.discountInfo.id}
+                      </Text>
+                      <Text variant="bodySm" as="p">
+                        <strong>Function ID:</strong> {result.discountInfo.functionId}
+                      </Text>
+                    </div>
+                  )}
+                </Banner>
+              )}
+              
+              <Button 
+                primary 
+                size="large"
+                onClick={createDiscountAutomatically}
+                loading={isCreatingDiscount}
+                disabled={isCreatingDiscount}
+              >
+                {isCreatingDiscount ? (
+                  <Stack alignment="center" spacing="tight">
+                    <Spinner size="small" />
+                    <Text>Creating Discount...</Text>
+                  </Stack>
+                ) : (
+                  '🎯 Auto-Create Test Discount'
+                )}
+              </Button>
+              
+              <Text variant="bodySm" as="p" tone="subdued" alignment="center">
+                This will create a discount using the new API at dfn-discount-app-backend.vercel.app
+              </Text>
+            </Stack>
+          </Card>
+        </Layout.Section>
+
         {/* Test Instructions */}
         <Layout.Section>
           <Card sectioned>
@@ -45,7 +174,7 @@ export default function TestDiscount() {
                         Create a Test Discount
                       </Text>
                       <Text variant="bodyMd" as="p" tone="subdued">
-                        Go to Shopify Admin → Discounts → Create discount. Choose "Order discount" and select "DFN Discount App" as the function.
+                        Use the "Auto-Create Test Discount" button above, or go to Shopify Admin → Discounts → Create discount. Choose "Order discount" and select "DFN Discount App" as the function.
                       </Text>
                     </Box>
                   </Stack>
