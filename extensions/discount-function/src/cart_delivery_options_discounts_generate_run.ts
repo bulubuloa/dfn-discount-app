@@ -8,28 +8,40 @@ import {
 export function cartDeliveryOptionsDiscountsGenerateRun(
   input: DeliveryInput,
 ): CartDeliveryOptionsDiscountsGenerateRunResult {
+  console.log('🚚 DFN Shipping Discount Function TRIGGERED!');
+  console.log('Function called with input:', JSON.stringify(input, null, 2));
+  
   const firstDeliveryGroup = input.cart.deliveryGroups[0];
   if (!firstDeliveryGroup) {
-    console.log("No delivery groups found, returning empty operations");
+    console.log("❌ No delivery groups found, returning empty operations");
     return {operations: []};
   }
+
+  console.log('✅ Found delivery group:', firstDeliveryGroup.id);
 
   const hasShippingDiscountClass = input.discount.discountClasses.includes(
     DiscountClass.Shipping,
   );
 
+  console.log('✅ Has Shipping discount class:', hasShippingDiscountClass);
+
   if (!hasShippingDiscountClass) {
-    console.log("No shipping discount class found, returning empty operations");
+    console.log("❌ No shipping discount class found, returning empty operations");
     return {operations: []};
   }
 
-  return {
+  // Configurable shipping discount percentage
+  const SHIPPING_DISCOUNT_PERCENT = 50;
+  
+  console.log(`🎉 Applying ${SHIPPING_DISCOUNT_PERCENT}% shipping discount`);
+
+  const result = {
     operations: [
       {
         deliveryDiscountsAdd: {
           candidates: [
             {
-              message: "50% OFF SHIPPING",
+              message: `${SHIPPING_DISCOUNT_PERCENT}% OFF SHIPPING`,
               targets: [
                 {
                   deliveryGroup: {
@@ -39,7 +51,7 @@ export function cartDeliveryOptionsDiscountsGenerateRun(
               ],
               value: {
                 percentage: {
-                  value: 50,
+                  value: SHIPPING_DISCOUNT_PERCENT,
                 },
               },
             },
@@ -49,4 +61,9 @@ export function cartDeliveryOptionsDiscountsGenerateRun(
       },
     ],
   };
+
+  console.log('✅ Shipping discount operation added');
+  console.log('Returning operations:', JSON.stringify(result, null, 2));
+  
+  return result;
 }

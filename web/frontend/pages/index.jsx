@@ -1,8 +1,20 @@
-import { useEffect } from "react";
-import { Page, Layout, Card, Text, Stack, Badge, Button, Banner, Icon, Box } from "@shopify/polaris";
+import { useEffect, useState } from "react";
+import { Page, Layout, Card, Text, Stack, Badge, Button, Banner, Icon, Box, TextField, Select, FormLayout, ButtonGroup } from "@shopify/polaris";
 import { DiscountsMajor, CartMajor, DiscountAutomaticMajor } from "@shopify/polaris-icons";
 
 export default function Index() {
+  const [config, setConfig] = useState({
+    orderDiscountPercent: 20,
+    productDiscountPercent: 15,
+    shippingDiscountPercent: 50,
+    minimumOrderAmount: 0,
+    enableOrderDiscount: true,
+    enableProductDiscount: true,
+    enableShippingDiscount: true
+  });
+
+  const [isConfiguring, setIsConfiguring] = useState(false);
+
   useEffect(() => {
     // If we're in a Shopify Function configuration context, close it immediately
     if (window.shopify && window.shopify.config) {
@@ -14,6 +26,21 @@ export default function Index() {
       }
     }
   }, []);
+
+  const handleConfigChange = (field, value) => {
+    setConfig(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const saveConfiguration = () => {
+    // Here you would typically save to your backend or Shopify app settings
+    console.log('Saving configuration:', config);
+    setIsConfiguring(false);
+    // Show success message
+    alert('Configuration saved! Now create a discount in Shopify and select this app.');
+  };
 
   return (
     <Page title="DFN Discount App - Powerful Cart Discounts">
@@ -38,6 +65,102 @@ export default function Index() {
           </Card>
         </Layout.Section>
 
+        {/* Configuration Section */}
+        <Layout.Section>
+          <Card sectioned>
+            <Stack vertical spacing="loose">
+              <Stack alignment="center" spacing="tight">
+                <Text variant="headingMd" as="h2">
+                  ⚙️ Discount Configuration
+                </Text>
+                <Button 
+                  size="small"
+                  onClick={() => setIsConfiguring(!isConfiguring)}
+                >
+                  {isConfiguring ? 'Cancel' : 'Configure Discounts'}
+                </Button>
+              </Stack>
+              
+              {isConfiguring ? (
+                <FormLayout>
+                  <Stack vertical spacing="loose">
+                    <Text variant="headingSm" as="h3">Order Discounts</Text>
+                    <Stack>
+                      <TextField
+                        label="Order Discount Percentage"
+                        type="number"
+                        value={config.orderDiscountPercent.toString()}
+                        onChange={(value) => handleConfigChange('orderDiscountPercent', parseInt(value) || 0)}
+                        suffix="%"
+                        min={0}
+                        max={100}
+                        helpText="Percentage off entire order subtotal"
+                      />
+                      <TextField
+                        label="Minimum Order Amount"
+                        type="number"
+                        value={config.minimumOrderAmount.toString()}
+                        onChange={(value) => handleConfigChange('minimumOrderAmount', parseFloat(value) || 0)}
+                        prefix="$"
+                        min={0}
+                        helpText="Minimum order value to qualify for discount"
+                      />
+                    </Stack>
+                    
+                    <Text variant="headingSm" as="h3">Product Discounts</Text>
+                    <TextField
+                      label="Product Discount Percentage"
+                      type="number"
+                      value={config.productDiscountPercent.toString()}
+                      onChange={(value) => handleConfigChange('productDiscountPercent', parseInt(value) || 0)}
+                      suffix="%"
+                      min={0}
+                      max={100}
+                      helpText="Percentage off individual products"
+                    />
+                    
+                    <Text variant="headingSm" as="h3">Shipping Discounts</Text>
+                    <TextField
+                      label="Shipping Discount Percentage"
+                      type="number"
+                      value={config.shippingDiscountPercent.toString()}
+                      onChange={(value) => handleConfigChange('shippingDiscountPercent', parseInt(value) || 0)}
+                      suffix="%"
+                      min={0}
+                      max={100}
+                      helpText="Percentage off shipping costs"
+                    />
+                    
+                    <ButtonGroup>
+                      <Button primary onClick={saveConfiguration}>
+                        Save Configuration
+                      </Button>
+                      <Button onClick={() => setIsConfiguring(false)}>
+                        Cancel
+                      </Button>
+                    </ButtonGroup>
+                  </Stack>
+                </FormLayout>
+              ) : (
+                <Stack vertical spacing="tight">
+                  <Text variant="bodyMd" as="p">
+                    <strong>Current Settings:</strong>
+                  </Text>
+                  <Text variant="bodyMd" as="p">
+                    • Order Discount: {config.orderDiscountPercent}% off (min. ${config.minimumOrderAmount})
+                  </Text>
+                  <Text variant="bodyMd" as="p">
+                    • Product Discount: {config.productDiscountPercent}% off individual items
+                  </Text>
+                  <Text variant="bodyMd" as="p">
+                    • Shipping Discount: {config.shippingDiscountPercent}% off shipping
+                  </Text>
+                </Stack>
+              )}
+            </Stack>
+          </Card>
+        </Layout.Section>
+
         {/* How It Works Section */}
         <Layout.Section>
           <Card sectioned>
@@ -48,20 +171,23 @@ export default function Index() {
               
               <Stack vertical spacing="tight">
                 <Text variant="bodyMd" as="p">
-                  <strong>1.</strong> Create a discount in Shopify Admin → Discounts
+                  <strong>1.</strong> Configure your discount percentages above (optional)
                 </Text>
                 <Text variant="bodyMd" as="p">
-                  <strong>2.</strong> Select "DFN Discount App" as the discount function
+                  <strong>2.</strong> Create a discount in Shopify Admin → Discounts
                 </Text>
                 <Text variant="bodyMd" as="p">
-                  <strong>3.</strong> The app automatically applies discounts to all qualifying carts
+                  <strong>3.</strong> Select "DFN Discount App" as the discount function
+                </Text>
+                <Text variant="bodyMd" as="p">
+                  <strong>4.</strong> The app automatically applies discounts to all qualifying carts
                 </Text>
               </Stack>
             </Stack>
           </Card>
         </Layout.Section>
 
-        {/* Available Discounts Section */}
+        {/* Available Discount Types */}
         <Layout.Section>
           <Card sectioned>
             <Stack vertical spacing="loose">
@@ -76,10 +202,11 @@ export default function Index() {
                     <Icon source={DiscountsMajor} tone="success" />
                     <Box minWidth="0" flexGrow={1}>
                       <Text variant="headingSm" as="h3">
-                        20% OFF ENTIRE ORDER
+                        {config.orderDiscountPercent}% OFF ENTIRE ORDER
                       </Text>
                       <Text variant="bodyMd" as="p" tone="subdued">
                         Applies to the entire cart subtotal. Perfect for store-wide sales!
+                        {config.minimumOrderAmount > 0 && ` Minimum order: $${config.minimumOrderAmount}`}
                       </Text>
                     </Box>
                   </Stack>
@@ -91,7 +218,7 @@ export default function Index() {
                     <Icon source={CartMajor} tone="info" />
                     <Box minWidth="0" flexGrow={1}>
                       <Text variant="headingSm" as="h3">
-                        15% OFF INDIVIDUAL PRODUCTS
+                        {config.productDiscountPercent}% OFF INDIVIDUAL PRODUCTS
                       </Text>
                       <Text variant="bodyMd" as="p" tone="subdued">
                         Applies to each product in the cart. Great for product-specific promotions!
@@ -106,7 +233,7 @@ export default function Index() {
                     <Icon source={DiscountAutomaticMajor} tone="warning" />
                     <Box minWidth="0" flexGrow={1}>
                       <Text variant="headingSm" as="h3">
-                        50% OFF SHIPPING
+                        {config.shippingDiscountPercent}% OFF SHIPPING
                       </Text>
                       <Text variant="bodyMd" as="p" tone="subdued">
                         Reduces shipping costs by half. Boosts conversion rates!
@@ -151,6 +278,12 @@ export default function Index() {
                 >
                   📖 Getting Started Guide
                 </Button>
+                <Button 
+                  size="large"
+                  url="/test-discount"
+                >
+                  🧪 Test Discount Function
+                </Button>
               </Stack>
             </Stack>
           </Card>
@@ -170,6 +303,9 @@ export default function Index() {
                 </Text>
                 <Text variant="bodyMd" as="p">
                   <strong>Coverage:</strong> All customer carts automatically
+                </Text>
+                <Text variant="bodyMd" as="p">
+                  <strong>Configuration:</strong> {isConfiguring ? 'Editing...' : 'Saved'}
                 </Text>
                 <Text variant="bodyMd" as="p">
                   <strong>Next Step:</strong> Create a discount using this function
@@ -205,6 +341,9 @@ export default function Index() {
                   <Text variant="bodyMd" as="p">
                     • Try refreshing the cart page
                   </Text>
+                  <Text variant="bodyMd" as="p">
+                    • Check browser console for any error messages
+                  </Text>
                 </Stack>
                 
                 <Button 
@@ -212,6 +351,12 @@ export default function Index() {
                   size="small"
                 >
                   📖 View Detailed Guide
+                </Button>
+                <Button 
+                  url="/debug"
+                  size="small"
+                >
+                  🔍 Debug Function
                 </Button>
               </Stack>
             </Stack>
