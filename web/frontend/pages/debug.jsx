@@ -66,7 +66,7 @@ export default function Debug() {
                     <strong>🎯 DFN Discount Function TRIGGERED!</strong>
                   </Text>
                   <Text variant="bodyMd" as="p" tone="subdued">
-                    <strong>Function called with input: {...}</strong>
+                    <strong>Function called with input: {'{...}'}</strong>
                   </Text>
                   <Text variant="bodyMd" as="p" tone="subdued">
                     <strong>Cart lines count: X</strong>
