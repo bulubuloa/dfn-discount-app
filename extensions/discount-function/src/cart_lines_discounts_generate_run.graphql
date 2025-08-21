@@ -2,25 +2,35 @@ query CartInput {
   cart {
     lines {
       id
-      cost {
-        subtotalAmount {
+      quantity
+      cost { 
+        subtotalAmount { 
+          amount 
+          currencyCode 
+        } 
+        amountPerQuantity {
           amount
           currencyCode
         }
       }
       merchandise {
+        __typename
         ... on ProductVariant {
           id
           title
-          product {
-            title
+          sku
+          product { 
+            title 
+          }
+          qbTiers: metafield(namespace: "qbtier", key: "tiers") {
+            value
+            type
           }
         }
       }
-      quantity
     }
   }
-  discount {
-    discountClasses
+  discount { 
+    discountClasses 
   }
 }

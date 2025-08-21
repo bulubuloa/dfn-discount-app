@@ -107,18 +107,13 @@ export type Attribute = {
  */
 export type BuyerIdentity = {
   __typename?: 'BuyerIdentity';
-  /**
-   * The customer that's interacting with the cart. A customer is a buyer who has an
-   * [account](https://help.shopify.com/manual/customers/customer-accounts) with the store.
-   */
+  /** The [customer](https://help.shopify.com/manual/customers/manage-customers) that's interacting with the cart. */
   customer?: Maybe<Customer>;
   /** The email address of the customer that's interacting with the cart. */
   email?: Maybe<Scalars['String']['output']>;
   /**
    * Whether the customer is authenticated through their
    * [customer account](https://help.shopify.com/manual/customers/customer-accounts).
-   * If the customer is authenticated, then the `customer` field returns the customer's information.
-   * If the customer isn't authenticated, then the `customer` field returns `null`.
    */
   isAuthenticated: Scalars['Boolean']['output'];
   /** The phone number of the customer that's interacting with the cart. */
@@ -134,7 +129,7 @@ export type BuyerIdentity = {
  * The cart where the Function is running. A cart contains the merchandise that a customer intends to purchase
  * and information about the customer, such as the customer's email address and phone number.
  */
-export type Cart = {
+export type Cart = HasMetafields & {
   __typename?: 'Cart';
   /**
    * The custom attributes associated with a cart to store additional information. Cart attributes
@@ -181,6 +176,16 @@ export type Cart = {
    * such as customs information or tax identification numbers.
    */
   localizedFields: Array<LocalizedField>;
+  /**
+   * A [custom field](https://shopify.dev/docs/apps/build/custom-data) that stores additional information
+   * about a Shopify resource, such as products, orders, and
+   * [many more](https://shopify.dev/docs/api/admin-graphql/latest/enums/MetafieldOwnerType).
+   * Using [metafields with Shopify Functions](https://shopify.dev/docs/apps/build/functions/input-output/metafields-for-input-queries)
+   * enables you to customize the checkout experience.
+   */
+  metafield?: Maybe<Metafield>;
+  /** The physical location where a retail order is created or completed. */
+  retailLocation?: Maybe<Location>;
 };
 
 
@@ -199,6 +204,16 @@ export type CartAttributeArgs = {
  */
 export type CartLocalizedFieldsArgs = {
   keys?: Array<LocalizedFieldKey>;
+};
+
+
+/**
+ * The cart where the Function is running. A cart contains the merchandise that a customer intends to purchase
+ * and information about the customer, such as the customer's email address and phone number.
+ */
+export type CartMetafieldArgs = {
+  key: Scalars['String']['input'];
+  namespace?: InputMaybe<Scalars['String']['input']>;
 };
 
 /**
@@ -238,6 +253,8 @@ export type CartDeliveryGroup = {
    * can choose to have their orders shipped. Examples include express shipping or standard shipping.
    */
   deliveryOptions: Array<CartDeliveryOption>;
+  /** The type of merchandise in the delivery group. */
+  groupType: CartDeliveryGroupType;
   /**
    * A [globally-unique ID](https://shopify.dev/docs/api/usage/gids)
    * for the delivery group.
@@ -246,6 +263,17 @@ export type CartDeliveryGroup = {
   /** Information about the delivery option that the customer has selected. */
   selectedDeliveryOption?: Maybe<CartDeliveryOption>;
 };
+
+/** Defines what type of merchandise is in the delivery group. */
+export enum CartDeliveryGroupType {
+  /**
+   * The delivery group only contains merchandise that is either a one time purchase or a first delivery of
+   * subscription merchandise.
+   */
+  OneTimePurchase = 'ONE_TIME_PURCHASE',
+  /** The delivery group only contains subscription merchandise. */
+  Subscription = 'SUBSCRIPTION'
+}
 
 /**
  * Information about a delivery option that's available for an item in a cart. Delivery options are the different
@@ -1437,8 +1465,7 @@ export type CustomProduct = {
 };
 
 /**
- * Represents a [customer](https://help.shopify.com/manual/customers/manage-customers)
- * who has an [account](https://help.shopify.com/manual/customers/customer-accounts) with the store.
+ * Represents a [customer](https://help.shopify.com/manual/customers/manage-customers).
  * `Customer` returns data including the customer's contact information and order history.
  */
 export type Customer = HasMetafields & {
@@ -1463,10 +1490,7 @@ export type Customer = HasMetafields & {
    * from the list to return `true`.
    */
   hasAnyTag: Scalars['Boolean']['output'];
-  /**
-   * Whether the customer is associated with the specified tags. The customer must have all of the tags in the list
-   * to return `true`.
-   */
+  /** Whether the customer is associated with the specified tags. */
   hasTags: Array<HasTagResponse>;
   /**
    * A [globally-unique ID](https://shopify.dev/docs/api/usage/gids)
@@ -1489,8 +1513,7 @@ export type Customer = HasMetafields & {
 
 
 /**
- * Represents a [customer](https://help.shopify.com/manual/customers/manage-customers)
- * who has an [account](https://help.shopify.com/manual/customers/customer-accounts) with the store.
+ * Represents a [customer](https://help.shopify.com/manual/customers/manage-customers).
  * `Customer` returns data including the customer's contact information and order history.
  */
 export type CustomerHasAnyTagArgs = {
@@ -1499,8 +1522,7 @@ export type CustomerHasAnyTagArgs = {
 
 
 /**
- * Represents a [customer](https://help.shopify.com/manual/customers/manage-customers)
- * who has an [account](https://help.shopify.com/manual/customers/customer-accounts) with the store.
+ * Represents a [customer](https://help.shopify.com/manual/customers/manage-customers).
  * `Customer` returns data including the customer's contact information and order history.
  */
 export type CustomerHasTagsArgs = {
@@ -1509,8 +1531,7 @@ export type CustomerHasTagsArgs = {
 
 
 /**
- * Represents a [customer](https://help.shopify.com/manual/customers/manage-customers)
- * who has an [account](https://help.shopify.com/manual/customers/customer-accounts) with the store.
+ * Represents a [customer](https://help.shopify.com/manual/customers/manage-customers).
  * `Customer` returns data including the customer's contact information and order history.
  */
 export type CustomerMetafieldArgs = {
@@ -2416,6 +2437,63 @@ export enum LocalizedFieldKey {
   TaxEmailIt = 'TAX_EMAIL_IT'
 }
 
+/** Represents the location where the inventory resides. */
+export type Location = HasMetafields & {
+  __typename?: 'Location';
+  /** The address of this location. */
+  address: LocationAddress;
+  /** The location handle. */
+  handle: Scalars['Handle']['output'];
+  /** The location id. */
+  id: Scalars['ID']['output'];
+  /**
+   * A [custom field](https://shopify.dev/docs/apps/build/custom-data) that stores additional information
+   * about a Shopify resource, such as products, orders, and
+   * [many more](https://shopify.dev/docs/api/admin-graphql/latest/enums/MetafieldOwnerType).
+   * Using [metafields with Shopify Functions](https://shopify.dev/docs/apps/build/functions/input-output/metafields-for-input-queries)
+   * enables you to customize the checkout experience.
+   */
+  metafield?: Maybe<Metafield>;
+  /** The name of the location. */
+  name: Scalars['String']['output'];
+};
+
+
+/** Represents the location where the inventory resides. */
+export type LocationMetafieldArgs = {
+  key: Scalars['String']['input'];
+  namespace?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Represents the address of a location. */
+export type LocationAddress = {
+  __typename?: 'LocationAddress';
+  /** The first line of the address for the location. */
+  address1?: Maybe<Scalars['String']['output']>;
+  /** The second line of the address for the location. */
+  address2?: Maybe<Scalars['String']['output']>;
+  /** The city of the location. */
+  city?: Maybe<Scalars['String']['output']>;
+  /** The country of the location. */
+  country?: Maybe<Scalars['String']['output']>;
+  /** The country code of the location. */
+  countryCode?: Maybe<Scalars['String']['output']>;
+  /** A formatted version of the address for the location. */
+  formatted: Array<Scalars['String']['output']>;
+  /** The approximate latitude coordinates of the location. */
+  latitude?: Maybe<Scalars['Float']['output']>;
+  /** The approximate longitude coordinates of the location. */
+  longitude?: Maybe<Scalars['Float']['output']>;
+  /** The phone number of the location. */
+  phone?: Maybe<Scalars['String']['output']>;
+  /** The province of the location. */
+  province?: Maybe<Scalars['String']['output']>;
+  /** The code for the province, state, or district of the address of the location. */
+  provinceCode?: Maybe<Scalars['String']['output']>;
+  /** The ZIP code of the location. */
+  zip?: Maybe<Scalars['String']['output']>;
+};
+
 /** Represents a mailing address. */
 export type MailingAddress = {
   __typename?: 'MailingAddress';
@@ -2700,10 +2778,7 @@ export type Product = HasMetafields & {
    * from the list to return `true`.
    */
   hasAnyTag: Scalars['Boolean']['output'];
-  /**
-   * Whether the product is associated with the specified tags. The product must have all of the tags in the list
-   * to return `true`.
-   */
+  /** Whether the product is associated with the specified tags. */
   hasTags: Array<HasTagResponse>;
   /**
    * A [globally-unique ID](https://shopify.dev/docs/api/usage/gids)
@@ -3092,4 +3167,4 @@ export type DeliveryInput = { __typename?: 'Input', cart: { __typename?: 'Cart',
 export type CartInputVariables = Exact<{ [key: string]: never; }>;
 
 
-export type CartInput = { __typename?: 'Input', cart: { __typename?: 'Cart', lines: Array<{ __typename?: 'CartLine', id: string, quantity: number, cost: { __typename?: 'CartLineCost', subtotalAmount: { __typename?: 'MoneyV2', amount: any, currencyCode: CurrencyCode } }, merchandise: { __typename?: 'CustomProduct' } | { __typename?: 'ProductVariant', id: string, title?: string | null, product: { __typename?: 'Product', title: string } } }> }, discount: { __typename?: 'Discount', discountClasses: Array<DiscountClass> } };
+export type CartInput = { __typename?: 'Input', cart: { __typename?: 'Cart', lines: Array<{ __typename?: 'CartLine', id: string, quantity: number, cost: { __typename?: 'CartLineCost', subtotalAmount: { __typename?: 'MoneyV2', amount: any, currencyCode: CurrencyCode }, amountPerQuantity: { __typename?: 'MoneyV2', amount: any, currencyCode: CurrencyCode } }, merchandise: { __typename: 'CustomProduct' } | { __typename: 'ProductVariant', id: string, title?: string | null, sku?: string | null, product: { __typename?: 'Product', title: string }, qbTiers?: { __typename?: 'Metafield', value: string, type: string } | null } }> }, discount: { __typename?: 'Discount', discountClasses: Array<DiscountClass> } };
