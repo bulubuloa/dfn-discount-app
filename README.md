@@ -2,7 +2,7 @@
 
 A Shopify app that provides a powerful 50% discount function for e-commerce stores. This app allows store owners to easily apply 50% discounts to orders or individual products using Shopify's discount function API.
 
-## 🎯 Features
+##  Features
 
 - **50% Order Discount**: Apply 50% off to entire orders
 - **50% Product Discount**: Apply 50% off to individual cart line items
@@ -10,7 +10,7 @@ A Shopify app that provides a powerful 50% discount function for e-commerce stor
 - **Multiple Cart Lines**: Automatically applies discounts to all cart items
 - **Smart Integration**: Works seamlessly with Shopify's existing discount system
 
-## 🚀 How It Works
+##  How It Works
 
 The discount function (`cart_lines_discounts_generate_run`) processes cart input and generates discount operations based on the configured discount classes:
 
@@ -18,7 +18,7 @@ The discount function (`cart_lines_discounts_generate_run`) processes cart input
 2. **Product Discount Class**: Creates individual 50% discounts for each cart line item
 3. **Combined**: Both discounts can be applied simultaneously
 
-## 🛠️ Technology Stack
+## 🛠 Technology Stack
 
 - **Backend**: Node.js with Express
 - **Frontend**: React with Shopify Polaris components
@@ -46,7 +46,7 @@ dfn-discount-app/
 └── README.md                       # This file
 ```
 
-## 🔧 Installation & Setup
+##  Installation & Setup
 
 ### Prerequisites
 
@@ -99,7 +99,7 @@ dfn-discount-app/
    npm run deploy
    ```
 
-## 📋 Usage
+##  Usage
 
 ### Method 1: Manual Discount Creation (Shopify Admin)
 
@@ -208,7 +208,7 @@ Navigate to the app's main interface and use the "Quick Setup" section for autom
 - **Product**: Applies 50% to each cart line item individually
 - **Both**: Applies both types of discounts
 
-## 🔍 Configuration
+##  Configuration
 
 The app automatically detects the discount classes configured in your Shopify discount and applies the appropriate logic:
 
@@ -216,7 +216,7 @@ The app automatically detects the discount classes configured in your Shopify di
 - If only `Product` class is selected: 50% off each item
 - If both classes are selected: Both discounts are applied
 
-## 🧪 Testing
+##  Testing
 
 ### Function Testing
 
@@ -232,7 +232,7 @@ cd web/frontend
 npm test
 ```
 
-## 🚀 Deployment
+##  Deployment
 
 ### Development
 
@@ -286,7 +286,7 @@ The app requires the following Shopify permissions:
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🔧 Troubleshooting
+##  Troubleshooting
 
 ### GraphiQL Issues
 
@@ -328,7 +328,7 @@ This usually means the function ID is incorrect or the function isn't properly d
 **"Permission denied" error:**
 Make sure your app has the `write_discounts` permission and is properly installed on the store.
 
-## 🆘 Support
+##  Support
 
 For support and questions:
 - Check the [Shopify documentation](https://shopify.dev/docs/apps/discounts)
@@ -336,7 +336,7 @@ For support and questions:
 - Check the Shopify Partner dashboard for deployment status
 - Use the app's built-in GraphiQL Setup page for step-by-step guidance
 
-## 🎉 Acknowledgments
+##  Acknowledgments
 
 - Built with [Shopify CLI](https://shopify.dev/docs/apps/tools/cli)
 - Uses [Shopify Polaris](https://polaris.shopify.com/) design system
@@ -344,4 +344,4 @@ For support and questions:
 
 ---
 
-**Built with ❤️ for Shopify merchants**
+**Built with ❤ for Shopify merchants**

@@ -14,7 +14,7 @@ export default function Debug() {
             <Stack vertical spacing="loose" alignment="center">
               <Icon source={PlayMajor} tone="success" />
               <Text variant="headingLg" as="h1" alignment="center">
-                🔍 Debug Your Discount Function
+                 Debug Your Discount Function
               </Text>
               <Text variant="bodyLg" as="p" alignment="center" tone="subdued">
                 Learn how to verify if your discount function is being triggered and troubleshoot issues.
@@ -30,7 +30,7 @@ export default function Debug() {
               <Stack alignment="center" spacing="tight">
                 <Icon source={AppsMajor} tone="info" />
                 <Text variant="headingMd" as="h2">
-                  🚀 GraphiQL Interface Setup
+                   GraphiQL Interface Setup
                 </Text>
               </Stack>
               
@@ -226,7 +226,7 @@ export default function Debug() {
           <Card sectioned>
             <Stack vertical spacing="loose">
               <Text variant="headingMd" as="h2">
-                🎯 How to Verify Function is Triggered
+                 How to Verify Function is Triggered
               </Text>
               
               <Stack vertical spacing="loose">
@@ -243,7 +243,7 @@ export default function Debug() {
                   <strong>Step 4:</strong> Add products to cart and go to cart page
                 </Text>
                 <Text variant="bodyMd" as="p">
-                  <strong>Step 5:</strong> Look for logs starting with "🎯 DFN Discount Function TRIGGERED!"
+                  <strong>Step 5:</strong> Look for logs starting with " DFN Discount Function TRIGGERED!"
                 </Text>
               </Stack>
             </Stack>
@@ -255,13 +255,13 @@ export default function Debug() {
           <Card sectioned>
             <Stack vertical spacing="loose">
               <Text variant="headingMd" as="h2">
-                📋 Expected Console Logs
+                 Expected Console Logs
               </Text>
               
               <Card sectioned>
                 <Stack vertical spacing="tight">
                   <Text variant="bodyMd" as="p" tone="subdued">
-                    <strong>🎯 DFN Discount Function TRIGGERED!</strong>
+                    <strong> DFN Discount Function TRIGGERED!</strong>
                   </Text>
                   <Text variant="bodyMd" as="p" tone="subdued">
                     <strong>Function called with input: {'{...}'}</strong>
@@ -273,16 +273,16 @@ export default function Debug() {
                     <strong>Discount classes: ["ORDER"]</strong>
                   </Text>
                   <Text variant="bodyMd" as="p" tone="subdued">
-                    <strong>✅ Has Order class: true</strong>
+                    <strong> Has Order class: true</strong>
                   </Text>
                   <Text variant="bodyMd" as="p" tone="subdued">
-                    <strong>🎉 Applying 20% order discount</strong>
+                    <strong> Applying 20% order discount</strong>
                   </Text>
                   <Text variant="bodyMd" as="p" tone="subdued">
-                    <strong>✅ Order discount operation added</strong>
+                    <strong> Order discount operation added</strong>
                   </Text>
                   <Text variant="bodyMd" as="p" tone="subdued">
-                    <strong>🎯 Final operations count: 1</strong>
+                    <strong> Final operations count: 1</strong>
                   </Text>
                 </Stack>
               </Card>
@@ -295,7 +295,7 @@ export default function Debug() {
           <Card sectioned>
             <Stack vertical spacing="loose">
               <Text variant="headingMd" as="h2">
-                ❌ If You Don't See Logs
+                 If You Don't See Logs
               </Text>
               
               <Stack vertical spacing="loose">
@@ -348,7 +348,7 @@ export default function Debug() {
           <Card sectioned>
             <Stack vertical spacing="loose">
               <Text variant="headingMd" as="h2">
-                🧪 Quick Test Steps
+                 Quick Test Steps
               </Text>
               
               <Stack vertical spacing="tight">
@@ -392,19 +392,19 @@ export default function Debug() {
                   size="large"
                   url="/graphiql-setup"
                 >
-                  🚀 GraphiQL Setup
+                   GraphiQL Setup
                 </Button>
                 <Button 
                   size="large"
                   onClick={() => window.open("https://admin.shopify.com/store/btsa-shop-staging/discounts", "_blank")}
                 >
-                  🎯 Create Test Discount
+                   Create Test Discount
                 </Button>
                 <Button 
                   size="large"
                   url="/test-discount"
                 >
-                  🧪 Test Page
+                   Test Page
                 </Button>
                 <Button 
                   size="large"

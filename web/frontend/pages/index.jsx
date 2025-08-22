@@ -49,7 +49,7 @@ export default function Index() {
     setResult(null);
     
     try {
-      setResult({ type: 'info', message: '🔍 Creating discount automatically using new API...' });
+      setResult({ type: 'info', message: ' Creating discount automatically using new API...' });
       
       console.log('Creating discount using new backend API...');
       
@@ -90,7 +90,7 @@ export default function Index() {
       if (data.success && data.summary?.discountId) {
         setResult({ 
           type: 'success', 
-          message: `✅ Discount created successfully! ID: ${data.summary.discountId}. The discount is now active in your store.`,
+          message: ` Discount created successfully! ID: ${data.summary.discountId}. The discount is now active in your store.`,
           discountInfo: {
             id: data.summary.discountId,
             functionId: data.summary.functionId,
@@ -101,7 +101,7 @@ export default function Index() {
         // Show error message
         setResult({ 
           type: 'error', 
-          message: `❌ Automatic creation failed: ${data.error || 'Unknown error'}. ${data.details || ''}`,
+          message: ` Automatic creation failed: ${data.error || 'Unknown error'}. ${data.details || ''}`,
         });
       }
       
@@ -172,7 +172,7 @@ export default function Index() {
       
       setResult({ 
         type: 'warning', 
-        message: `⚠️ ${error.message}. Using manual instructions below.`,
+        message: ` ${error.message}. Using manual instructions below.`,
         instructions: fallbackInstructions
       });
     } finally {
@@ -200,7 +200,7 @@ export default function Index() {
           <Card sectioned>
             <Stack vertical spacing="loose" alignment="center">
               <Text variant="headingMd" as="h2" alignment="center">
-                🚀 One-Click Discount Creation
+                 One-Click Discount Creation
               </Text>
               
               <Text variant="bodyMd" as="p" alignment="center" tone="subdued">
@@ -218,7 +218,7 @@ export default function Index() {
                     <Card sectioned>
                       <Stack vertical spacing="loose">
                         <Text variant="headingSm" as="h3">
-                          ✅ Discount Created Successfully
+                           Discount Created Successfully
                         </Text>
                         
                         <Stack vertical spacing="tight">
@@ -237,7 +237,7 @@ export default function Index() {
                         </Stack>
                         
                         <Banner tone="success">
-                          <p><strong>🎉 Your discount is now active!</strong> Customers will automatically receive the discount when they meet the conditions.</p>
+                          <p><strong> Your discount is now active!</strong> Customers will automatically receive the discount when they meet the conditions.</p>
                         </Banner>
                       </Stack>
                     </Card>
@@ -247,7 +247,7 @@ export default function Index() {
                     <Card sectioned>
                       <Stack vertical spacing="loose">
                         <Text variant="headingSm" as="h3">
-                          📋 Step-by-Step Instructions
+                           Step-by-Step Instructions
                         </Text>
                         
                         {result.instructions.steps.map((step, index) => (
@@ -281,7 +281,7 @@ export default function Index() {
                         <Card sectioned>
                           <Stack vertical spacing="tight">
                             <Text variant="headingSm" as="h4">
-                              🚀 Quick Start
+                               Quick Start
                             </Text>
                             <List type="number">
                               {result.instructions.quickStart.instructions.map((instruction, index) => (
@@ -303,7 +303,7 @@ export default function Index() {
                 loading={isCreatingDiscount}
                 disabled={isCreatingDiscount}
               >
-                {isCreatingDiscount ? 'Creating Discount...' : '🎯 Create Discount Automatically'}
+                {isCreatingDiscount ? 'Creating Discount...' : ' Create Discount Automatically'}
               </Button>
 
               <Banner tone="info">
@@ -319,7 +319,7 @@ export default function Index() {
             <Stack vertical spacing="loose">
               <Stack alignment="center" spacing="tight">
                 <Text variant="headingMd" as="h2">
-                  ⚙️ Discount Configuration
+                  ⚙ Discount Configuration
                 </Text>
                 <Button 
                   size="small"
@@ -422,19 +422,19 @@ export default function Index() {
                   size="large"
                   url="/api-test"
                 >
-                  🧪 API Test
+                   API Test
                 </Button>
                 <Button 
                   size="large"
                   url="/debug"
                 >
-                  🔍 Debug Function
+                   Debug Function
                 </Button>
                 <Button 
                   size="large"
                   url="/test-discount"
                 >
-                  🧪 Test Discount
+                   Test Discount
                 </Button>
                 <Button 
                   size="large"

@@ -1,4 +1,4 @@
-import shopifyRealHandler from './dist/api/shopify-real.js';
+import shopifyRealHandler from '../dist/api/shopify-real.js';
 
 // Mock Vercel request/response objects
 const createMockReq = (method = 'POST', body = {}, headers = {}) => ({
@@ -40,7 +40,7 @@ const createMockRes = () => {
 };
 
 // Test the new Shopify real API
-console.log('🧪 Testing new Shopify real API...\n');
+console.log(' Testing new Shopify real API...\n');
 
 console.log('Testing POST request to /api/shopify-real:');
 const shopifyReq = createMockReq('POST', { 
@@ -57,4 +57,4 @@ try {
   console.log('Expected error (no real Shopify credentials):', error.message);
 }
 
-console.log('\n✅ Shopify real API test completed!');
+console.log('\n Shopify real API test completed!');

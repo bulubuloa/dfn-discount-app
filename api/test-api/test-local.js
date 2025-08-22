@@ -1,8 +1,8 @@
-import healthHandler from './dist/api/health.js';
-import shopifyFunctionsHandler from './dist/api/shopify-functions.js';
-import createDiscountHandler from './dist/api/create-discount-automatic.js';
-import discountWorkflowHandler from './dist/api/discount-workflow.js';
-import testGraphQLHandler from './dist/api/test-graphql.js';
+import healthHandler from '../dist/api/health.js';
+import shopifyFunctionsHandler from '../dist/api/shopify-functions.js';
+import createDiscountHandler from '../dist/api/create-discount-automatic.js';
+import discountWorkflowHandler from '../dist/api/discount-workflow.js';
+import testGraphQLHandler from '../dist/api/test-graphql.js';
 
 // Mock Vercel request/response objects
 const createMockReq = (method = 'GET', body = {}) => ({
@@ -39,7 +39,7 @@ const createMockRes = () => {
 };
 
 // Test all endpoints
-console.log('🧪 Testing API endpoints locally...\n');
+console.log(' Testing API endpoints locally...\n');
 
 // Test health endpoint
 console.log('1. Testing /api/health:');
@@ -67,4 +67,4 @@ const graphqlReq = createMockReq('GET');
 const graphqlRes = createMockRes();
 testGraphQLHandler(graphqlReq, graphqlRes);
 
-console.log('\n✅ All tests completed!');
+console.log('\n All tests completed!');

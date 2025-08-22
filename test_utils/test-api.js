@@ -21,13 +21,13 @@ async function testDiscountAPI() {
     console.log('Response data:', JSON.stringify(data, null, 2));
 
     if (data.success && data.discountId) {
-      console.log('✅ SUCCESS: Discount created with ID:', data.discountId);
+      console.log(' SUCCESS: Discount created with ID:', data.discountId);
     } else {
-      console.log('❌ FAILED:', data.error || 'Unknown error');
+      console.log(' FAILED:', data.error || 'Unknown error');
     }
 
   } catch (error) {
-    console.error('❌ ERROR:', error.message);
+    console.error(' ERROR:', error.message);
   }
 }
 

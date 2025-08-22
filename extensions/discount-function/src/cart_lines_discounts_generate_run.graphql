@@ -21,12 +21,21 @@ query CartInput {
           sku
           product { 
             id
-            title 
+            title
+            qbTiers: metafield(namespace: "qbtier", key: "tiers") {
+              value
+              type
+            }
           }
           qbTiers: metafield(namespace: "qbtier", key: "tiers") {
             value
             type
           }
+          customTiers: metafield(namespace: "custom", key: "quantity_breaks") {
+            value
+            type
+          }
+
         }
       }
     }

@@ -1,4 +1,4 @@
-import discountWorkflowHandler from './dist/api/discount-workflow.js';
+import discountWorkflowHandler from '../dist/api/discount-workflow.js';
 
 // Mock Vercel request/response objects
 const createMockReq = (method = 'OPTIONS') => ({
@@ -41,11 +41,11 @@ const createMockRes = () => {
 };
 
 // Test CORS preflight
-console.log('🧪 Testing CORS preflight request...\n');
+console.log(' Testing CORS preflight request...\n');
 
 console.log('Testing OPTIONS request to /api/discount-workflow:');
 const optionsReq = createMockReq('OPTIONS');
 const optionsRes = createMockRes();
 discountWorkflowHandler(optionsReq, optionsRes);
 
-console.log('\n✅ CORS test completed!');
+console.log('\n CORS test completed!');

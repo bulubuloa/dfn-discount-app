@@ -2,7 +2,7 @@
 
 This directory contains a TypeScript Node.js Express API for managing Shopify discount functions. The API can be deployed to Vercel and provides REST endpoints for getting function IDs and creating automatic discounts.
 
-## 🏗️ Project Structure
+## 🏗 Project Structure
 
 ```
 api/
@@ -18,7 +18,7 @@ api/
 └── README.md                  # This file
 ```
 
-## 🚀 API Endpoints
+##  API Endpoints
 
 ### 1. Health Check
 **GET** `/api/health`
@@ -153,7 +153,7 @@ Combines getting the function ID and creating a discount in one call.
 }
 ```
 
-## 🔧 GraphQL Queries Used
+##  GraphQL Queries Used
 
 ### Get Function ID Query
 ```graphql
@@ -193,7 +193,7 @@ mutation {
 }
 ```
 
-## 🚀 Deployment
+##  Deployment
 
 ### Prerequisites
 1. Node.js 18+ installed
@@ -297,7 +297,7 @@ const workflowResponse = await fetch('https://your-vercel-app.vercel.app/api/dis
 });
 ```
 
-## 🔍 Troubleshooting
+##  Troubleshooting
 
 ### Common Issues
 
@@ -331,20 +331,20 @@ If the API fails, you can test manually:
 - `PORT`: Server port (default: 3001)
 - `NODE_ENV`: Environment (development/production)
 
-## 📋 Features
+##  Features
 
-- ✅ TypeScript with strict type checking
-- ✅ Express.js with proper middleware
-- ✅ CORS enabled for cross-origin requests
-- ✅ Comprehensive error handling
-- ✅ Detailed logging and debugging
-- ✅ Vercel deployment ready
-- ✅ Exact GraphQL queries from Shopify docs
-- ✅ Complete workflow automation
-- ✅ Health check endpoint
-- ✅ Environment variable support
+-  TypeScript with strict type checking
+-  Express.js with proper middleware
+-  CORS enabled for cross-origin requests
+-  Comprehensive error handling
+-  Detailed logging and debugging
+-  Vercel deployment ready
+-  Exact GraphQL queries from Shopify docs
+-  Complete workflow automation
+-  Health check endpoint
+-  Environment variable support
 
-## 🛠️ Development
+## 🛠 Development
 
 ### Available Scripts
 

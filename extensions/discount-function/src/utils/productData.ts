@@ -35,13 +35,28 @@ export function getQuantityBreakTiersFromCartLine(cartLine: any): Array<{quantit
 
   console.log(`Processing quantity breaks for SKU: ${merchandise.sku}`);
   
-  // Check for qbtier metafield
-  const qbTiersField = merchandise.qbTiers;
-  console.log(`QB Tiers metafield:`, qbTiersField);
+  // Check metafield sources for quantity break data
+  const metafieldSources = [
+    // Variant-level metafields
+    { name: 'variant.qbTiers', field: merchandise.qbTiers },
+    { name: 'variant.customTiers', field: merchandise.customTiers },
+    // Product-level metafields (fallback)
+    { name: 'product.qbTiers', field: merchandise.product?.qbTiers }
+  ];
   
-  if (qbTiersField?.value) {
+  let foundMetafield = null;
+  for (const source of metafieldSources) {
+    if (source.field?.value) {
+      console.log(`Found quantity break data in ${source.name}:`, source.field);
+      foundMetafield = source.field;
+      break;
+    }
+  }
+  
+  // Try to parse JSON-based metafields first
+  if (foundMetafield?.value) {
     try {
-      const qbData = JSON.parse(qbTiersField.value);
+      const qbData = JSON.parse(foundMetafield.value);
       console.log(`Parsed QB data:`, qbData);
       
       if (qbData.breaks && Array.isArray(qbData.breaks)) {
@@ -69,10 +84,56 @@ export function getQuantityBreakTiersFromCartLine(cartLine: any): Array<{quantit
       console.log(`Error parsing QB tiers JSON:`, error);
     }
   }
+  
+  // If no JSON data found, try individual quantity price break fields
+  if (tiers.length === 0) {
+    console.log(`Trying individual quantity price break fields...`);
+    
+    // Check for individual quantity price break metafields (format: "quantity:price")
+    const qpbFields = [
+      { name: 'quantityPriceBreak1', field: merchandise.quantityPriceBreak1 },
+      { name: 'quantityPriceBreak2', field: merchandise.quantityPriceBreak2 },
+      { name: 'quantityPriceBreak3', field: merchandise.quantityPriceBreak3 }
+    ];
+    
+    for (const qpb of qpbFields) {
+      if (qpb.field?.value) {
+        console.log(`Found ${qpb.name}:`, qpb.field.value);
+        
+        // Try different formats: "quantity:price", "quantity,price", or JSON
+        const value = qpb.field.value.trim();
+        let quantity, price;
+        
+        if (value.includes(':')) {
+          [quantity, price] = value.split(':').map(s => s.trim());
+        } else if (value.includes(',')) {
+          [quantity, price] = value.split(',').map(s => s.trim());
+        } else {
+          try {
+            const parsed = JSON.parse(value);
+            quantity = parsed.quantity || parsed.min;
+            price = parsed.price;
+          } catch (e) {
+            console.log(`Could not parse ${qpb.name} value: ${value}`);
+            continue;
+          }
+        }
+        
+        const qty = parseInt(quantity);
+        const prc = parseFloat(price);
+        
+        if (!isNaN(qty) && !isNaN(prc) && qty > 0 && prc > 0) {
+          tiers.push({quantity: qty, price: prc});
+          console.log(`Found tier from ${qpb.name}: ${qty}+ items at $${prc} each`);
+        }
+      }
+    }
+  }
 
   if (tiers.length === 0) {
     console.log(`No quantity break tiers found for SKU: ${merchandise.sku}`);
-    console.log(`Looking for metafield with namespace "qbtier" and key "tiers"`);
+    console.log(`Checked metafields:`, metafieldSources.map(s => `${s.name}: ${s.field ? 'exists' : 'null'}`));
+    console.log(`Available metafield namespaces to try: "qbtier", "custom", "app", or others`);
   } else {
     console.log(`Found ${tiers.length} quantity break tiers`);
   }

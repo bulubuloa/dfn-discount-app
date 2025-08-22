@@ -12,6 +12,7 @@
     "deploy": "shopify app deploy"
   },
   "dependencies": {
+    "dotenv": "^17.2.1",
     "papaparse": "^5.5.3"
   },
   "author": "hoangq",

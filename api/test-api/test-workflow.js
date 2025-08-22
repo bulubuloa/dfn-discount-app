@@ -1,4 +1,4 @@
-import discountWorkflowHandler from './dist/api/discount-workflow.js';
+import discountWorkflowHandler from '../dist/api/discount-workflow.js';
 
 // Mock Vercel request/response objects
 const createMockReq = (method = 'POST', body = {}, headers = {}) => ({
@@ -39,7 +39,7 @@ const createMockRes = () => {
 };
 
 // Test discount workflow
-console.log('🧪 Testing discount workflow...\n');
+console.log(' Testing discount workflow...\n');
 
 console.log('Testing POST request to /api/discount-workflow:');
 const workflowReq = createMockReq('POST', { 
@@ -50,4 +50,4 @@ const workflowReq = createMockReq('POST', {
 const workflowRes = createMockRes();
 await discountWorkflowHandler(workflowReq, workflowRes);
 
-console.log('\n✅ Workflow test completed!');
+console.log('\n Workflow test completed!');

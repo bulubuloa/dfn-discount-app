@@ -158,7 +158,7 @@ app.post("/api/create-discount", shopify.validateAuthenticatedSession(), async (
     // Prepare the discount input
     const discountInput = {
       title: title,
-      message: message || "🎉 Special discount applied automatically!",
+      message: message || " Special discount applied automatically!",
       functionId: functionId,
       startsAt: new Date().toISOString(),
       endsAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // 1 year from now
