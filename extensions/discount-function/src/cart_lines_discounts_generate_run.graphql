@@ -20,6 +20,7 @@ query CartInput {
           title
           sku
           product { 
+            id
             title 
           }
           qbTiers: metafield(namespace: "qbtier", key: "tiers") {
