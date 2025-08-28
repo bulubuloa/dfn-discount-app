@@ -29,11 +29,8 @@ export function getQuantityBreakTiersFromCartLine(cartLine: any): Array<{quantit
   const merchandise = cartLine.merchandise as any;
   
   if (!merchandise?.sku) {
-    console.log('No SKU found for cart line');
     return [];
   }
-
-  console.log(`Processing quantity breaks for SKU: ${merchandise.sku}`);
   
   // Check metafield sources for quantity break data
   const metafieldSources = [
@@ -47,7 +44,6 @@ export function getQuantityBreakTiersFromCartLine(cartLine: any): Array<{quantit
   let foundMetafield = null;
   for (const source of metafieldSources) {
     if (source.field?.value) {
-      console.log(`Found quantity break data in ${source.name}:`, source.field);
       foundMetafield = source.field;
       break;
     }
@@ -57,7 +53,6 @@ export function getQuantityBreakTiersFromCartLine(cartLine: any): Array<{quantit
   if (foundMetafield?.value) {
     try {
       const qbData = JSON.parse(foundMetafield.value);
-      console.log(`Parsed QB data:`, qbData);
       
       if (qbData.breaks && Array.isArray(qbData.breaks)) {
         for (const breakTier of qbData.breaks) {
@@ -66,7 +61,6 @@ export function getQuantityBreakTiersFromCartLine(cartLine: any): Array<{quantit
           
           if (!isNaN(quantity) && !isNaN(price) && quantity > 0 && price > 0) {
             tiers.push({quantity, price});
-            console.log(`Found tier: ${quantity}+ items at $${price} each`);
           }
         }
       }
@@ -75,20 +69,17 @@ export function getQuantityBreakTiersFromCartLine(cartLine: any): Array<{quantit
       if (qbData.fixed) {
         const fixedPrice = parseFloat(qbData.fixed);
         if (!isNaN(fixedPrice) && fixedPrice > 0) {
-          console.log(`Fixed price: $${fixedPrice}`);
           // Add fixed price as the base tier (quantity 1)
           tiers.unshift({quantity: 1, price: fixedPrice});
         }
       }
     } catch (error) {
-      console.log(`Error parsing QB tiers JSON:`, error);
+      // Silent fail - try other methods
     }
   }
   
   // If no JSON data found, try individual quantity price break fields
   if (tiers.length === 0) {
-    console.log(`Trying individual quantity price break fields...`);
-    
     // Check for individual quantity price break metafields (format: "quantity:price")
     const qpbFields = [
       { name: 'quantityPriceBreak1', field: merchandise.quantityPriceBreak1 },
@@ -98,8 +89,6 @@ export function getQuantityBreakTiersFromCartLine(cartLine: any): Array<{quantit
     
     for (const qpb of qpbFields) {
       if (qpb.field?.value) {
-        console.log(`Found ${qpb.name}:`, qpb.field.value);
-        
         // Try different formats: "quantity:price", "quantity,price", or JSON
         const value = qpb.field.value.trim();
         let quantity, price;
@@ -114,7 +103,6 @@ export function getQuantityBreakTiersFromCartLine(cartLine: any): Array<{quantit
             quantity = parsed.quantity || parsed.min;
             price = parsed.price;
           } catch (e) {
-            console.log(`Could not parse ${qpb.name} value: ${value}`);
             continue;
           }
         }
@@ -124,18 +112,9 @@ export function getQuantityBreakTiersFromCartLine(cartLine: any): Array<{quantit
         
         if (!isNaN(qty) && !isNaN(prc) && qty > 0 && prc > 0) {
           tiers.push({quantity: qty, price: prc});
-          console.log(`Found tier from ${qpb.name}: ${qty}+ items at $${prc} each`);
         }
       }
     }
-  }
-
-  if (tiers.length === 0) {
-    console.log(`No quantity break tiers found for SKU: ${merchandise.sku}`);
-    console.log(`Checked metafields:`, metafieldSources.map(s => `${s.name}: ${s.field ? 'exists' : 'null'}`));
-    console.log(`Available metafield namespaces to try: "qbtier", "custom", "app", or others`);
-  } else {
-    console.log(`Found ${tiers.length} quantity break tiers`);
   }
 
   return tiers.sort((a, b) => a.quantity - b.quantity);
@@ -149,7 +128,6 @@ export function getQuantityBreakTiersFromCartLine(cartLine: any): Array<{quantit
 export function calculateTargetPriceFromCartLine(cartLine: any, quantity: number): number | null {
   const tiers = getQuantityBreakTiersFromCartLine(cartLine);
   if (tiers.length === 0) {
-    console.log('No tiers found for target price calculation');
     return null;
   }
   
@@ -159,13 +137,11 @@ export function calculateTargetPriceFromCartLine(cartLine: any, quantity: number
   for (let i = tiers.length - 1; i >= 0; i--) {
     if (quantity >= tiers[i].quantity) {
       applicablePrice = tiers[i].price;
-      console.log(`Using tier for ${tiers[i].quantity}+ items: $${applicablePrice} each for quantity ${quantity}`);
       break;
     }
   }
   
   const totalPrice = applicablePrice * quantity;
-  console.log(`Target price calculation: ${quantity} × $${applicablePrice} = $${totalPrice}`);
   return totalPrice;
 }
 
@@ -175,15 +151,12 @@ export function calculateTargetPriceFromCartLine(cartLine: any, quantity: number
 export function calculateShopifyTieredPriceFromCartLine(cartLine: any, quantity: number): number | null {
   const tiers = getQuantityBreakTiersFromCartLine(cartLine);
   if (tiers.length === 0) {
-    console.log('No tiers found for Shopify tiered price calculation');
     return null;
   }
   
   let remainingQuantity = quantity;
   let totalPrice = 0;
   let currentTierIndex = 0;
-  
-  console.log(`Calculating Shopify tiered price for ${quantity} items:`);
   
   while (remainingQuantity > 0 && currentTierIndex < tiers.length) {
     const currentTier = tiers[currentTierIndex];
@@ -199,12 +172,9 @@ export function calculateShopifyTieredPriceFromCartLine(cartLine: any, quantity:
     const tierPrice = tierQuantity * currentTier.price;
     totalPrice += tierPrice;
     remainingQuantity -= tierQuantity;
-    
-    console.log(`Tier ${currentTierIndex + 1}: ${tierQuantity} items × $${currentTier.price} = $${tierPrice}`);
     currentTierIndex++;
   }
   
-  console.log(`Shopify tiered total: $${totalPrice}`);
   return totalPrice;
 }
 
@@ -218,7 +188,6 @@ export function calculateQuantityBreakDiscountFromCartLine(cartLine: any, quanti
   
   // Discount = Shopify Price - Your Price (when your price is lower)
   const discount = shopifyPrice - yourPrice;
-  console.log(`Discount calculation: $${shopifyPrice} - $${yourPrice} = $${discount}`);
   
   return Math.max(0, discount);
 }
@@ -242,20 +211,17 @@ export function calculateQuantityBreakDiscountPercentageFromCartLine(cartLine: a
 export function getApplicablePriceBreakFromCartLine(cartLine: any, quantity: number): number | null {
   const tiers = getQuantityBreakTiersFromCartLine(cartLine);
   if (tiers.length === 0) {
-    console.log('No tiers found for price break calculation');
     return null;
   }
   
   // Find the highest tier that applies to this quantity
   for (let i = tiers.length - 1; i >= 0; i--) {
     if (quantity >= tiers[i].quantity) {
-      console.log(`Applicable price break for ${quantity} items: $${tiers[i].price} (tier: ${tiers[i].quantity}+)`);
       return tiers[i].price;
     }
   }
   
   // If no tier applies, use the first tier (base price)
-  console.log(`Using base price tier: $${tiers[0].price}`);
   return tiers[0].price;
 }
 
@@ -286,24 +252,20 @@ export function getProductInfoFromCartLine(cartLine: any): {sku: string, name: s
         fixedPrice = parseFloat(qbData.fixed);
       }
     } catch (error) {
-      console.log(`Error parsing QB tiers for fixed price:`, error);
+      // Silent fail
     }
   }
   
   // Fallback to cost if no fixed price found
   if (!fixedPrice || fixedPrice <= 0) {
-    fixedPrice = cartLine.cost?.amountPerQuantity?.amount || 0;
+    fixedPrice = parseFloat(cartLine.cost?.amountPerQuantity?.amount || '0');
   }
   
-  console.log(`Product info for ${sku}: name="${name}", fixedPrice=$${fixedPrice}`);
-  
   if (!sku) {
-    console.log('No SKU found in merchandise');
     return null;
   }
   
   if (!fixedPrice || fixedPrice <= 0) {
-    console.log('No valid fixed price found');
     return null;
   }
   

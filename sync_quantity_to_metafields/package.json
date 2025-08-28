@@ -1,0 +1,17 @@
+{
+  "name": "quantity-break-sync",
+  "version": "1.0.0",
+  "description": "Sync Shopify quantity breaks to metafields",
+  "main": "sync-all-products.js",
+  "scripts": {
+    "sync": "node sync-all-products.js",
+    "sync-single": "node sync-quantity-breaks.js",
+    "test-webhook": "node ../webhooks/products/update.js",
+    "setup-webhooks": "node setup-webhooks.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.0",
+    "node-fetch": "^3.3.0"
+  },
+  "type": "module"
+}
