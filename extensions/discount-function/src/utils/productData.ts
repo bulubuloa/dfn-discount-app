@@ -141,7 +141,7 @@ export function calculateTargetPriceFromCartLine(cartLine: any, quantity: number
     }
   }
   
-  const totalPrice = applicablePrice * quantity;
+  const totalPrice = applicablePrice * cartLine.quantity;
   return totalPrice;
 }
 

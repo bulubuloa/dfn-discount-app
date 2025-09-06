@@ -99,72 +99,32 @@ export function cartLinesDiscountsGenerateRun(
   for (const [groupKey, group] of productGroups) {
     if (group.lines.length === 0) continue;
 
-    // Find the first line with quantity breaks to get the tier structure
-    const lineWithBreaks = group.lines.find(lineData => lineData.hasBreaks);
-    if (!lineWithBreaks) continue;
+    // Check if any lines have quantity breaks
+    const hasAnyBreaks = group.lines.some(lineData => lineData.hasBreaks);
+    if (!hasAnyBreaks) continue;
 
-    // Use the total quantity across ALL variants to determine the best applicable tier
-    const bestApplicablePriceBreak = getApplicablePriceBreakFromCartLine(lineWithBreaks.line, group.totalQuantityWithBreaks);
-    
-    if (!bestApplicablePriceBreak) continue;
-
-    // Apply the best tier pricing to each individual line (all variants get the same tier benefit)
+    // Apply the best tier pricing to each individual line
+    // Each variant uses its own pricing structure with the total group quantity to determine the best tier
     for (const lineData of group.lines) {
       const { line, productInfo, quantity, shopifyPrice, hasBreaks, variantId } = lineData;
       
       // Only apply discounts to lines that have quantity break pricing
       if (!hasBreaks) continue;
       
-      // Each variant uses its own pricing structure but with the best tier price
-      const variantTiers = getQuantityBreakTiersFromCartLine(line);
-      if (variantTiers.length === 0) continue;
+      // Use the total group quantity to find the best applicable tier for this specific variant
+      const targetPrice = calculateTargetPriceFromCartLine(line, group.totalQuantityWithBreaks);
+      if (targetPrice === null) continue;
       
-      // Find the best tier price for this variant's structure based on total product quantity
-      let bestVariantPrice = variantTiers[0].price; // Default to first tier
-      
-      // Map total product quantity to the appropriate tier for this variant
-      // If total quantity is 150+, find the highest tier this variant supports
-      if (group.totalQuantityWithBreaks >= 150) {
-        // Find the highest tier available for this variant (150+ equivalent)
-        for (let i = variantTiers.length - 1; i >= 0; i--) {
-          if (variantTiers[i].quantity >= 150) {
-            bestVariantPrice = variantTiers[i].price;
-            break;
-          }
-        }
-        // If no 150+ tier exists, use the highest available tier
-        if (bestVariantPrice === variantTiers[0].price) {
-          bestVariantPrice = variantTiers[variantTiers.length - 1].price;
-        }
-      } else if (group.totalQuantityWithBreaks >= 50) {
-        // Find the 50+ tier for this variant
-        for (let i = variantTiers.length - 1; i >= 0; i--) {
-          if (variantTiers[i].quantity >= 50) {
-            bestVariantPrice = variantTiers[i].price;
-            break;
-          }
-        }
-        // If no 50+ tier exists, use the highest available tier
-        if (bestVariantPrice === variantTiers[0].price) {
-          bestVariantPrice = variantTiers[variantTiers.length - 1].price;
-        }
-      } else if (group.totalQuantityWithBreaks >= 10) {
-        // Find the 10+ tier for this variant
-        for (let i = variantTiers.length - 1; i >= 0; i--) {
-          if (variantTiers[i].quantity >= 10) {
-            bestVariantPrice = variantTiers[i].price;
-            break;
-          }
-        }
-      }
-      
-      const yourPriceWithBestTier = bestVariantPrice * quantity;
-      const discountAmount = shopifyPrice - yourPriceWithBestTier;
+      // Calculate the discount amount
+      const discountAmount = shopifyPrice - targetPrice;
       
       if (discountAmount <= 0) continue;
 
+      // Calculate the per-item price for the message
+      const perItemPrice = targetPrice / quantity;
+      
       discountCandidates.push({
-        message: `QUANTITY BREAK: ${quantity} items at $${bestVariantPrice} each (${group.totalQuantityWithBreaks} total from ${group.productTitle}) - Best Price: $${bestVariantPrice}`,
+        message: `QUANTITY BREAK: ${quantity} items at $${perItemPrice.toFixed(2)} each (${group.totalQuantityWithBreaks} total from ${group.productTitle}) - Best Price: $${perItemPrice.toFixed(2)}`,
         targets: [
           {
             cartLine: {
