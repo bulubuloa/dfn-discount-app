@@ -210,11 +210,11 @@ async function syncAllProductsAPI(shopDomain: string, accessToken: string): Prom
   let cursor: string | null = null;
   let pageCount = 0;
 
-  console.log('📊 Fetching all product variants...');
+  console.log('Fetching all product variants...');
 
   while (hasNextPage) {
     pageCount++;
-    console.log(`📄 Page ${pageCount}...`);
+    console.log(`Page ${pageCount}...`);
     
     const data = await makeGraphQLRequest<ProductVariantsResponse>(GET_VARIANTS_QUERY, {
       first: 100,
@@ -233,7 +233,7 @@ async function syncAllProductsAPI(shopDomain: string, accessToken: string): Prom
     node.quantityPriceBreaks && node.quantityPriceBreaks.length > 0
   );
 
-  console.log(`🎯 Found ${variantsWithQuantityBreaks.length} variants with quantity breaks`);
+  console.log(`Found ${variantsWithQuantityBreaks.length} variants with quantity breaks`);
 
   if (variantsWithQuantityBreaks.length === 0) {
     return {
@@ -291,13 +291,13 @@ async function syncAllProductsAPI(shopDomain: string, accessToken: string): Prom
       });
 
       if (result.metafieldsSet.userErrors && result.metafieldsSet.userErrors.length > 0) {
-        console.log('⚠️  Batch errors:', result.metafieldsSet.userErrors);
+        console.log('Batch errors:', result.metafieldsSet.userErrors);
         errorCount += result.metafieldsSet.userErrors.length;
       } else {
         successCount += batch.length;
       }
     } catch (error) {
-      console.error('❌ Batch error:', error instanceof Error ? error.message : 'Unknown error');
+      console.error('Batch error:', error instanceof Error ? error.message : 'Unknown error');
       errorCount += batch.length;
     }
   }
