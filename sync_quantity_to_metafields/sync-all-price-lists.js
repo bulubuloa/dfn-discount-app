@@ -11,7 +11,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const SHOP_DOMAIN = process.env.SHOPIFY_SHOP_DOMAIN || 'btsa-shop-staging-2025.myshopify.com';
-const ACCESS_TOKEN = process.env.SHOPIFY_ACCESS_TOKEN || 'your-access-token';
+const ACCESS_TOKEN = process.env.SHOPIFY_ACCESS_TOKEN || '';
 
 // Query to get a single price list with all its prices
 const GET_PRICE_LIST_QUERY = `
@@ -71,6 +71,55 @@ const GET_ALL_PRICE_LISTS_QUERY = `
   }
 `;
 
+// Query to get all products with their variants to find metafields
+const GET_PRODUCTS_WITH_METAFIELDS_QUERY = `
+  query getProductsWithMetafields($first: Int!, $after: String) {
+    products(first: $first, after: $after) {
+      edges {
+        node {
+          id
+          title
+          variants(first: 100) {
+            edges {
+              node {
+                id
+                title
+                metafields(first: 10, namespace: "qbtier") {
+                  edges {
+                    node {
+                      id
+                      namespace
+                      key
+                      value
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+`;
+
+// Mutation to delete metafields
+const DELETE_METAFIELDS_MUTATION = `
+  mutation metafieldsDelete($metafields: [MetafieldIdentifierInput!]!) {
+    metafieldsDelete(metafields: $metafields) {
+      deletedMetafields { key namespace ownerId }
+      userErrors {
+        field
+        message
+      }
+    }
+  }
+`;
+
 // Mutation to create metafields
 const CREATE_METAFIELDS_MUTATION = `
   mutation metafieldSet($metafields: [MetafieldsSetInput!]!) {
@@ -110,6 +159,100 @@ async function makeGraphQLRequest(query, variables = {}) {
   }
 
   return data.data;
+}
+
+async function getAllExistingMetafields() {
+  let allMetafields = [];
+  let hasNextPage = true;
+  let cursor = null;
+  let pageCount = 0;
+
+  console.log('Fetching existing metafields with qbtier namespace...');
+
+  while (hasNextPage) {
+    pageCount++;
+    
+    const data = await makeGraphQLRequest(GET_PRODUCTS_WITH_METAFIELDS_QUERY, {
+      first: 10,
+      after: cursor
+    });
+
+    const products = data.products.edges;
+    let metafieldsInThisPage = 0;
+    
+    // Extract metafields from all variants in all products
+    for (const { node: product } of products) {
+      for (const { node: variant } of product.variants.edges) {
+        for (const { node: metafield } of variant.metafields.edges) {
+          if (metafield.namespace === "qbtier" && metafield.key === "tiers") {
+            allMetafields.push({
+              node: {
+                id: metafield.id,
+                namespace: metafield.namespace,
+                key: metafield.key,
+                ownerId: variant.id
+              }
+            });
+            metafieldsInThisPage++;
+          }
+        }
+      }
+    }
+    
+    hasNextPage = data.products.pageInfo.hasNextPage;
+    cursor = data.products.pageInfo.endCursor;
+    
+    console.log(`Page ${pageCount}: Found ${metafieldsInThisPage} metafields in ${products.length} products`);
+  }
+
+  console.log(`Total existing metafields found: ${allMetafields.length}`);
+  return allMetafields;
+}
+
+async function deleteAllExistingMetafields() {
+  const existingMetafields = await getAllExistingMetafields();
+  
+  if (existingMetafields.length === 0) {
+    console.log('No existing metafields to clean up');
+    return { deletedCount: 0, errorCount: 0 };
+  }
+
+  console.log(`Deleting ${existingMetafields.length} existing metafields...`);
+  
+  let deletedCount = 0;
+  let errorCount = 0;
+  const totalMetafields = existingMetafields.length;
+
+  for (let i = 0; i < existingMetafields.length; i++) {
+    const metafield = existingMetafields[i];
+    
+    try {
+      const result = await makeGraphQLRequest(DELETE_METAFIELDS_MUTATION, {
+        metafields: [{ ownerId: metafield.node.ownerId, namespace: "qbtier", key: "tiers" }]
+      });
+
+      if (result.metafieldsDelete.userErrors && result.metafieldsDelete.userErrors.length > 0) {
+        console.log(`Error deleting metafield ${i + 1}/${totalMetafields}:`, result.metafieldsDelete.userErrors);
+        errorCount++;
+      } else {
+        deletedCount += result.metafieldsDelete.deletedMetafields.length;
+        if ((i + 1) % 50 === 0 || i === existingMetafields.length - 1) {
+          console.log(`Deleted ${i + 1}/${totalMetafields} metafields (${deletedCount} successful, ${errorCount} errors)`);
+        }
+      }
+    } catch (error) {
+      console.error(`Error deleting metafield ${i + 1}/${totalMetafields}:`, error.message);
+      errorCount++;
+    }
+
+    // Add a small delay every 10 deletions to avoid rate limits
+    if ((i + 1) % 10 === 0) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+  }
+
+  console.log(`Cleanup complete: ${deletedCount} deleted, ${errorCount} errors`);
+  return { deletedCount, errorCount };
 }
 
 async function getAllPriceLists() {  
@@ -179,8 +322,14 @@ async function getAllVariantsWithQuantityBreaks() {
     );
 
     if (variantsWithBreaks.length > 0) {      
+      console.log(`Found ${variantsWithBreaks.length} variants with quantity breaks in ${priceList.name}`);
+      
       // Add price list info to each variant
       variantsWithBreaks.forEach(({ node: price }) => {
+        const variantId = price.variant.id.split('/').pop();
+        const quantityBreaks = price.quantityPriceBreaks.edges.length;
+        console.log(`Variant ${variantId}: ${price.variant.title} (${quantityBreaks} breaks)`);
+        
         allVariantsWithBreaks.push({
           ...price,
           priceListName: priceList.name,
@@ -188,7 +337,7 @@ async function getAllVariantsWithQuantityBreaks() {
         });
       });
     } else {
-      console.log(`  No variants with quantity breaks in ${priceList.name}`);
+      console.log(`No variants with quantity breaks in ${priceList.name}`);
     }
   }
 
@@ -292,7 +441,10 @@ function printSummaryReport(conversionReport, successCount, errorCount) {
 
 async function syncAllPriceLists() {
   try {
-    // Step 1: Get all variants with quantity breaks
+    console.log('Cleaning up existing metafields...');
+    const { deletedCount, errorCount: deleteErrors } = await deleteAllExistingMetafields();
+
+    console.log('Fetching variants with quantity breaks...');
     const variantsWithQuantityBreaks = await getAllVariantsWithQuantityBreaks();
     
     if (variantsWithQuantityBreaks.length === 0) {
@@ -300,29 +452,38 @@ async function syncAllPriceLists() {
       return;
     }
 
-    // Step 2: Convert to metafields format
-    const { metafieldsToCreate, conversionReport } = await convertToMetafields(variantsWithQuantityBreaks);
+    console.log(`Found ${variantsWithQuantityBreaks.length} variants with quantity breaks\n`);
 
-    // Step 3: Create metafields in batches
+    console.log('Converting to metafields format...');
+    const { metafieldsToCreate, conversionReport } = await convertToMetafields(variantsWithQuantityBreaks);
+    console.log(`Prepared ${metafieldsToCreate.length} metafields for creation\n`);
+
+    console.log('Creating new metafields...');
     const { successCount, errorCount } = await createMetafieldsInBatches(metafieldsToCreate);
 
-    // Step 4: Print summary report
     printSummaryReport(conversionReport, successCount, errorCount);
+    
+    if (deletedCount > 0) {
+      console.log(`Cleanup: ${deletedCount} old metafields deleted`);
+    }
+    if (deleteErrors > 0) {
+      console.log(`Cleanup errors: ${deleteErrors}`);
+    }
 
   } catch (error) {
     console.error('Error during sync:', error.message);
-    console.error('Please check your SHOPIFY_SHOP_DOMAIN and SHOPIFY_ACCESS_TOKEN');
+    console.error('Please check SHOPIFY_SHOP_DOMAIN and SHOPIFY_ACCESS_TOKEN');
   }
 }
 
 // Check if required environment variables are set
 if (!SHOP_DOMAIN || SHOP_DOMAIN === 'your-shop.myshopify.com') {
-  console.error('Please set SHOPIFY_SHOP_DOMAIN environment variable');
+  console.error('Please set SHOPIFY_SHOP_DOMAIN environment');
   process.exit(1);
 }
 
 if (!ACCESS_TOKEN || ACCESS_TOKEN === 'your-access-token') {
-  console.error('Please set SHOPIFY_ACCESS_TOKEN environment variable');
+  console.error('Please set SHOPIFY_ACCESS_TOKEN environment');
   process.exit(1);
 }
 

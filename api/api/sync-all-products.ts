@@ -112,7 +112,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    console.log(`🚀 Starting sync for ${shopDomain}`);
+    console.log(`Starting sync for ${shopDomain}`);
 
     // Same logic as sync-all-products.js but as API
     const result = await syncAllProductsAPI(shopDomain, accessToken);
