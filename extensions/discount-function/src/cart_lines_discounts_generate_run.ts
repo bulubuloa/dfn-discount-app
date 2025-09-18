@@ -119,7 +119,7 @@ export function cartLinesDiscountsGenerateRun(
       const perItemPrice = targetPrice / quantity;
       
       discountCandidates.push({
-        message: `QUANTITY BREAK: ${quantity} items at $${perItemPrice.toFixed(2)} each (${group.totalQuantityWithBreaks} total from ${group.productTitle}) - Best Price: $${perItemPrice.toFixed(2)}`,
+        message: `Tier Pricing Applied: "${group.totalQuantityWithBreaks}+" items → $${perItemPrice.toFixed(2)} each`,
         targets: [
           {
             cartLine: {
