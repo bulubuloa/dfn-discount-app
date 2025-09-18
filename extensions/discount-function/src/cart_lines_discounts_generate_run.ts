@@ -1,17 +1,12 @@
 import {
   DiscountClass,
-  OrderDiscountSelectionStrategy,
   ProductDiscountSelectionStrategy,
   CartInput,
   CartLinesDiscountsGenerateRunResult,
 } from '../generated/api';
 import {
   hasQuantityBreakPricingFromCartLine,
-  calculateQuantityBreakDiscountFromCartLine,
-  calculateQuantityBreakDiscountPercentageFromCartLine,
   calculateTargetPriceFromCartLine,
-  calculateShopifyTieredPriceFromCartLine,
-  getApplicablePriceBreakFromCartLine,
   getProductInfoFromCartLine,
   getQuantityBreakTiersFromCartLine,
 } from './utils/productData';
